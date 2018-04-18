@@ -8,13 +8,13 @@
 #define __BUFFER_H__
 
 #include <stdlib.h>
+#include <stdio.h>
 
-// Buffer struct.
 typedef struct buffer_s {
   void *data;
-  size_t buffer_size;  // Number of members in data array.
-  size_t member_size;  // Size of one member.
-  size_t p;  // First free position in data.
+  size_t buffer_size;  /* Number of members in data array.*/
+  size_t member_size;  /* Size of one member.*/
+  size_t p;  /* First free position in data.*/
 } Buffer;
 
 /*
@@ -50,7 +50,7 @@ void *buffer_push_back(Buffer *B);
 */
 int read_line(FILE *input, Buffer *B);
 
-// Some handy abbreviations.
+/* Some handy abbreviations.*/
 #define buffer_push_char(B, c)  (*((char *) buffer_push_back(B)) = c)
 
 #endif
