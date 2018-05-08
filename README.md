@@ -1,2 +1,2 @@
-# mac0323
-MAC0323 repository for EPs and Projects
+# mac0323-project
+Repository for MAC0323 projects
