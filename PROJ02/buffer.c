@@ -1,69 +1,76 @@
 #include "buffer.h"
+#define size 256    /*standard initial size for data*/
 
 Buffer *buffer_create(size_t member_size)
 {
     Buffer *b = (Buffer*)malloc(sizeof(Buffer));
     if(!b) fprintf(stderr, "Memória Insuficiente.\n");
-    b->buffer_size = 0;
-    b->member_size = member_size;
-    b->p = 5;
-    b->data = NULL;
+    b->buffer_size = size;
+    b->member_size = member_size;    
+    b->data = malloc(size * member_size + 1);
+    b->p = 0;
     return b;
 }
-
 void buffer_destroy(Buffer *B)
 {
-    free(B); /*Free mas nao tao nulo.*/
+    memset(B, 0, sizeof(*B));
+    free(B); 
 }
-
 void buffer_reset(Buffer *B)
-{
-    buffer_destroy(B);
-    B = buffer_create(1);
+{            
+    free(B->data);
+    B->data = malloc(size * B->member_size + 1);
+    B->p = 0;
 }
-
-/*
-  Return a valid pointer to the first free position of the
-  buffer. This means that, if the space allocated is not enough, then
-  the buffer size is increased and the contents are copied.
-*/
 void *buffer_push_back(Buffer *B)
 {
-       
+    B->buffer_size *= 2;
+    B->data = malloc(B->member_size * B->buffer_size + 1);
+    return (size_t *) B->p; 
 }
-
-/*
-  Read a line (i.e., reads up to a newline '\n' character or the
-  end-of-file) from the input file and places it into the given
-  buffer, including the newline character if it is present. The buffer
-  is resetted before the line is read.
-  Returns the number of characters read; in particular, returns ZERO
-  if end-of-file is reached before any characters are read.
-*/
 int read_line(FILE *input, Buffer *B)
 {
+    size_t count = 0;  /*char counter*/
+    int ch;          /*char that will be read*/
+    char *line;     /*line that will be read*/
+    char *d;
+    line = malloc(B->buffer_size);
     buffer_reset(B);
-    int count;
-    char c;
-    while(c != EOF)
-    {
-        
+    while((ch = fgetc(input)) != EOF)
+    {                
+        if(count == B->buffer_size)
+        {
+            B->p = (size_t)buffer_push_back(B);
+            memcpy(line, line, B->member_size * B->buffer_size + 1);
+        }  
+        if(ch == 10) 
+        {      
+            line[B->p++] = '\n';
+            if(count == B->buffer_size)
+            {
+                B->p = (size_t)buffer_push_back(B);
+                memcpy(line, line, B->member_size * B->buffer_size + 1);
+            }  
+            line[B->p++] = '\0';
+            count++; 
+            break;          
+        } 
+        line[B->p++] = ch;
+        count++;
     }
-
-    return count;
-}
-
-int main()
-{
-    Buffer *a2 = buffer_create(10);
-    printf("P: %d\n", a2->p);
-    buffer_reset(a2);
-    printf("P2: %d\n", a2->p);
-    a2->p = 12;
-    a2->member_size = 15;
-    a2->buffer_size = 15;
-    int *x = buffer_push_back(a2);
-    printf("x = %d\n", x);
-    buffer_destroy(a2);
-
+    if(ch == EOF)
+    {
+        if(count == B->buffer_size)
+        {
+            B->p = (size_t)buffer_push_back(B);
+            memcpy(line, line, B->member_size * B->buffer_size + 1);
+        }   
+        line[B->p++] = '\0';
+    }    
+    d = malloc(strlen (line) + 1);
+    strcpy(d, line);
+    B->data = d;
+    memset(line, 0, B->buffer_size);  
+    free(line);
+    return (int) count;
 }
