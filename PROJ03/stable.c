@@ -25,13 +25,13 @@ SymbolTable stable_create(){
     st->n = 0;
     return st;
 }
-node_t *createHead(const char* str){
+static node_t *createHead(const char* str){
     node_t* head = malloc(sizeof(node_t*));
     head->key = str;
     head->next = NULL;
     return head;
 }
-node_t *createNode(const char* str, node_t *head){
+static node_t *createNode(const char* str, node_t *head){
     node_t* node = (node_t*)malloc(sizeof(node_t));
     node->key = str;
     node->next = head;
@@ -41,7 +41,7 @@ void stable_destroy(SymbolTable table){
     memset(table, 0, sizeof(struct stable_s));
     free(table);
 }
-int hash(const char *key, int m){//modular hash function
+static int hash(const char *key, int m){//modular hash function
     return strlen(key)%m;
 }
 InsertionResult stable_insert(SymbolTable table, const char *key){
