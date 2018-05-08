@@ -6,7 +6,7 @@
 
 typedef struct node{
     const char *key;
-    EntryData data;
+    EntryData *data;
     struct node *next;
 } node_t;
 
@@ -27,12 +27,14 @@ SymbolTable stable_create(){
 }
 static node_t *createHead(const char* str){
     node_t* head = malloc(sizeof(node_t*));
+    head->data = (EntryData*)malloc(sizeof(EntryData));
     head->key = str;
     head->next = NULL;
     return head;
 }
 static node_t *createNode(const char* str, node_t *head){
     node_t* node = (node_t*)malloc(sizeof(node_t));
+    node->data = (EntryData*)malloc(sizeof(EntryData));
     node->key = str;
     node->next = head;
     return node;
@@ -51,7 +53,7 @@ InsertionResult stable_insert(SymbolTable table, const char *key){
         table->hash[h].head = createHead(key);
         table->hash[h].size = 1;
         ir.new = 1;              
-        ir.data = &table->hash[h].head->data;
+        ir.data = table->hash[h].head->data;
         table->n++;
     }
     else{
@@ -60,7 +62,7 @@ InsertionResult stable_insert(SymbolTable table, const char *key){
         while(current != NULL){
             if(strcmp(current->key, key) == 0){//the linked list has the key
                 ir.new = 0;
-                ir.data = &current->data;
+                ir.data = current->data;
                 have = 1;
                 break;
             }
@@ -72,7 +74,7 @@ InsertionResult stable_insert(SymbolTable table, const char *key){
             table->hash[h].head = node;
             table->hash[h].size++;
             ir.new = 1;
-            ir.data = &table->hash[h].head->data;
+            ir.data = table->hash[h].head->data;
             table->n++;
         }
     }
@@ -86,7 +88,7 @@ EntryData *stable_find(SymbolTable table, const char *key){
     while(current != NULL){
         if(strcmp(current->key, key) == 0){
             have = 1;
-            value->i = current->data.i;
+            value->i = current->data->i;
             break;
         }
         current = current->next;
@@ -96,11 +98,20 @@ EntryData *stable_find(SymbolTable table, const char *key){
     }
     return value;
 }
+static int print(const char *key, EntryData *data){
+    if(key != NULL && data != NULL){
+        printf("%s\t\t%d\n", key, data->i);
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 int stable_visit(SymbolTable table, int (*visit)(const char *key, EntryData *data)){
     for (int i = 0; i < M; i++){
         node_t *current = table->hash[i].head;
         while(current != NULL){
-            printf("%s\t\t%d\n", current->key, current->data.i);
+            printf("%s\t\t%d\n", current->key, current->data->i);
             current = current->next;
         }
     }
