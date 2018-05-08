@@ -8,13 +8,12 @@
 #define __BUFFER_H__
 
 #include <stdlib.h>
-#include <stdio.h>
 
 typedef struct buffer_s {
   void *data;
-  size_t buffer_size;  /* Number of members in data array.*/
-  size_t member_size;  /* Size of one member.*/
-  size_t p;  /* First free position in data.*/
+  size_t buffer_size;  // Number of members in data array.
+  size_t member_size;  // Size of one member.
+  size_t p;  // First free position in data.
 } Buffer;
 
 /*
