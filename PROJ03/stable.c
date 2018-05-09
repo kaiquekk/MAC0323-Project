@@ -22,17 +22,17 @@ struct stable_s{
 
 SymbolTable stable_create(){
     struct stable_s *st = malloc(sizeof(struct stable_s));
-    st->n = 0;
+    st->n = 0;//initialize the size of the stable
     return st;
 }
-static node_t *createHead(const char* str){
+static node_t *createHead(const char* str){//allocate memory and initialize a head node
     node_t* head = malloc(sizeof(node_t*));
     head->data = (EntryData*)malloc(sizeof(EntryData));
     head->key = str;
     head->next = NULL;
     return head;
 }
-static node_t *createNode(const char* str, node_t *head){
+static node_t *createNode(const char* str, node_t *head){//allocate memory and initialize a node
     node_t* node = (node_t*)malloc(sizeof(node_t));
     node->data = (EntryData*)malloc(sizeof(EntryData));
     node->key = str;
@@ -83,9 +83,9 @@ InsertionResult stable_insert(SymbolTable table, const char *key){
 EntryData *stable_find(SymbolTable table, const char *key){
     int h = hash(key, M);
     node_t *current = table->hash[h].head;
-    int have = 0; //flag to know if the linked_list has the key
+    int have = 0; //flag to know if the linked list has the key
     while(current != NULL){
-        if(strcmp(current->key, key) == 0){
+        if(strcmp(current->key, key) == 0){//the stable contains the key
             have = 1;
             return current->data;
             break;
@@ -102,11 +102,10 @@ int stable_visit(SymbolTable table, int (*visit)(const char *key, EntryData *dat
     for (int i = 0; i < M; i++){
         node_t *current = table->hash[i].head;
         while(current != NULL){
-            control = visit(current->key, current->data);
+            control = visit(current->key, current->data);//call the visit function on every node
             if(control == 0){
                 return 0;
             }                
-            /*printf("%s\t\t%d\n", current->key, current->data.i);*/
             current = current->next;
         }
     }
