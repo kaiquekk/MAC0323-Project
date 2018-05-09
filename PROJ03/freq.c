@@ -3,11 +3,12 @@
 #include <string.h>
 #define MAX_WORDS 2000
 #define MAX_LENGTH 200
-const char **keys;
-int *vals;
-int index;
-// A function to implement bubble sort
-void bubblesort(const char *keys[], int* vals, int n){
+const char **keys; //'array' os strings
+int *vals; //'array' of vals
+int index; //global counter for print function
+unsigned int maxLength = 0; //maximum length of all the keys
+//the Bubblesort recursive function
+static void bubblesort(const char *keys[], int* vals, int n){
     for (int i = 1; i < n; i++) {
         for (int j = 0; j < n-1; j++) {
             if(strcmp(keys[j], keys[j+1]) > 0){
@@ -21,7 +22,11 @@ void bubblesort(const char *keys[], int* vals, int n){
         }
     }
 }
-static int print(const char *key, EntryData *data){
+/*the get function to put all the keys and values into the respective arrays*/
+static int get(const char *key, EntryData *data){
+    if(strlen(key) > maxLength){
+        maxLength = strlen(key);
+    }
     if(key != NULL && data != NULL){
         keys[index] = key;
         vals[index] = data->i;
@@ -32,7 +37,11 @@ static int print(const char *key, EntryData *data){
         return 0;
     }
 }
-
+static void printSpace(int qtd){
+    if(qtd < 0) return;
+    printf(" ");
+    printSpace(qtd-1);
+}
 int main(int argc, char *argv[]){
     FILE *file;
     SymbolTable st;
@@ -83,10 +92,12 @@ int main(int argc, char *argv[]){
     keys = malloc(sizeof(char**) * (st->n+1));
     vals = malloc(sizeof(int) * (st->n+1));
     index = 0;
-    index = stable_visit(st, print); 
+    index = stable_visit(st, get); 
     bubblesort(keys, vals, st->n);
     for (int i = 0; i < st->n; i++){
-        printf("%-30s %4d\n", keys[i], vals[i]);
+        printf("%s", keys[i]);
+        printSpace(maxLength - strlen(keys[i]));
+        printf("%d\n", vals[i]);
     }
     fclose(file);
     stable_destroy(st);
