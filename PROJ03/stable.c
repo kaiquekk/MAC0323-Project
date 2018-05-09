@@ -83,12 +83,11 @@ InsertionResult stable_insert(SymbolTable table, const char *key){
 EntryData *stable_find(SymbolTable table, const char *key){
     int h = hash(key, M);
     node_t *current = table->hash[h].head;
-    EntryData *value = malloc(sizeof(EntryData));
     int have = 0; //flag to know if the linked_list has the key
     while(current != NULL){
         if(strcmp(current->key, key) == 0){
             have = 1;
-            value->i = current->data->i;
+            return current->data;
             break;
         }
         current = current->next;
@@ -96,7 +95,7 @@ EntryData *stable_find(SymbolTable table, const char *key){
     if(have == 0){
         current = NULL;
     }
-    return value;
+    return NULL;
 }
 static int print(const char *key, EntryData *data){
     if(key != NULL && data != NULL){
