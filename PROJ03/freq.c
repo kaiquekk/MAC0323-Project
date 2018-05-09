@@ -1,17 +1,38 @@
 #include "stable.c"
 #include <ctype.h>
+#include <string.h>
 #define MAX_WORDS 1000
 #define MAX_LENGTH 200
-
+char **keys;
+int *vals;
+int index;
+// A function to implement bubble sort
+void bubblesort(char *keys[], int* vals, int n){
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j < n-1; j++) {
+            if(strcmp(keys[j], keys[j+1]) > 0){
+                int aux = vals[j];
+                vals[j] = vals[j+1];
+                vals[j+1] = aux;
+                char *tmp = keys[j];
+                keys[j] = keys[j+1];
+                keys[j+1] = tmp;
+            }
+        }
+    }
+}
 static int print(const char *key, EntryData *data){
     if(key != NULL && data != NULL){
-        printf("%s\t\t%d\n", key, data->i);
+        keys[index] = key;
+        vals[index] = data->i;
+        index++;
         return 1;
     }
     else{
         return 0;
     }
 }
+
 int main(int argc, char *argv[]){
     FILE *file;
     SymbolTable st;
@@ -58,8 +79,15 @@ int main(int argc, char *argv[]){
             break;
         }
         textIndex++;
+    }    
+    keys = malloc(sizeof(char**) * (st->n+1));
+    vals = malloc(sizeof(int) * (st->n+1));
+    index = 0;
+    index = stable_visit(st, print); 
+    bubblesort(keys, vals, st->n);
+    for (int i = 0; i < st->n; i++){
+        printf("%s %d\n", keys[i],vals[i]);
     }
-    index = stable_visit(st, print);   
     fclose(file);
     stable_destroy(st);
 }
