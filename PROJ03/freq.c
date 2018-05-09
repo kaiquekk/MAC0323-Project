@@ -3,18 +3,18 @@
 #include <string.h>
 #define MAX_WORDS 1000
 #define MAX_LENGTH 200
-char **keys;
+const char **keys;
 int *vals;
 int index;
 // A function to implement bubble sort
-void bubblesort(char *keys[], int* vals, int n){
+void bubblesort(const char *keys[], int* vals, int n){
     for (int i = 1; i < n; i++) {
         for (int j = 0; j < n-1; j++) {
             if(strcmp(keys[j], keys[j+1]) > 0){
                 int aux = vals[j];
                 vals[j] = vals[j+1];
                 vals[j+1] = aux;
-                char *tmp = keys[j];
+                const char *tmp = keys[j];
                 keys[j] = keys[j+1];
                 keys[j+1] = tmp;
             }
