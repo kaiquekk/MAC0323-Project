@@ -1,7 +1,7 @@
 #include "stable.c"
 #include <ctype.h>
 #include <string.h>
-#define MAX_WORDS 1000
+#define MAX_WORDS 2000
 #define MAX_LENGTH 200
 const char **keys;
 int *vals;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
     index = stable_visit(st, print); 
     bubblesort(keys, vals, st->n);
     for (int i = 0; i < st->n; i++){
-        printf("%s %d\n", keys[i],vals[i]);
+        printf("%-30s %4d\n", keys[i], vals[i]);
     }
     fclose(file);
     stable_destroy(st);
