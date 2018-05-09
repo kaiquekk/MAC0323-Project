@@ -1,7 +1,8 @@
 #include "stable.c"
 #include <ctype.h>
+#define MAX_WORDS 1000
+#define MAX_LENGTH 200
 
-char words[1000][100];
 static int print(const char *key, EntryData *data){
     if(key != NULL && data != NULL){
         printf("%s\t\t%d\n", key, data->i);
@@ -12,16 +13,14 @@ static int print(const char *key, EntryData *data){
     }
 }
 int main(int argc, char *argv[]){
-    FILE *file, *file2;
+    FILE *file;
     SymbolTable st;
     InsertionResult ir;
-    int index, flag, textIndex, max_length, max_words;
-    max_length = 0;
-    max_words = 0;
+    char words[MAX_WORDS][MAX_LENGTH];
+    int index, flag, textIndex;
     flag = 0;
     textIndex = 0;
-    if(argc==1)
-    {
+    if(argc==1){
         perror("Missing arguments in command line.");
         return (-1);
     }   
@@ -29,34 +28,12 @@ int main(int argc, char *argv[]){
         perror("Too much arguments. Only one argument is needed.");
         return(-1);
     }
-    file = fopen(argv[1], "r");//file for inserting on stable
-    file2 = fopen(argv[1], "r");//file for counting words array indexes   
-    if(file2 == NULL)
-    {
+    file = fopen(argv[1], "r");//file for inserting on stable  
+    if(file == NULL){
         perror("Error in opening file.");
         return (-1);
     }  
     st = stable_create();
-
-    /*while(1){//words array indexes counter block
-        int i = 0;//auxiliary counter
-        char ch = (char)fgetc(file2);
-        while(!isblank(ch) && !feof(file2) && ch != '\n' && ch != '\t'){
-            i++;     
-            flag = 1;//setup flag to evade multiple blank spaces counting as a word
-            ch = (char)fgetc(file2);
-        }
-        if(flag == 1){
-            max_words++;
-            if(i>max_length) max_length = i;  
-            flag = 0;//reset the flag
-        }
-        if(feof(file2)){          
-            break;
-        }            
-    }
-    fclose(file2);  
-    char words[max_words][max_length+1];*/
     while(1){
         char ch = (char)fgetc(file);
         index = 0;
