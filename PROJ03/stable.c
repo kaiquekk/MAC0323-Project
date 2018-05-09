@@ -97,22 +97,18 @@ EntryData *stable_find(SymbolTable table, const char *key){
     }
     return NULL;
 }
-static int print(const char *key, EntryData *data){
-    if(key != NULL && data != NULL){
-        printf("%s\t\t%d\n", key, data->i);
-        return 1;
-    }
-    else{
-        return 0;
-    }
-}
 int stable_visit(SymbolTable table, int (*visit)(const char *key, EntryData *data)){
+    int control;
     for (int i = 0; i < M; i++){
         node_t *current = table->hash[i].head;
         while(current != NULL){
-            printf("%s\t\t%d\n", current->key, current->data->i);
+            control = visit(current->key, current->data);
+            if(control == 0){
+                return 0;
+            }                
+            /*printf("%s\t\t%d\n", current->key, current->data.i);*/
             current = current->next;
         }
     }
-    return 0;
+    return 1;
 }

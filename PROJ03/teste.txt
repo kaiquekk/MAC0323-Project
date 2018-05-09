@@ -1,0 +1,4 @@
+iny text tool at your service. This little toy replaces your text with superscript characters, 
+making things look very small! These are pure characters, no HTML, CSS, or other markup is used.
+These superscript characters will work fine in Twitter, Facebook, LinkedIn, and just about anywhere else on the Web... 
+Like this? Check out the new anti-surveillance and bold/italic tools.

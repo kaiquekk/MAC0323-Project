@@ -1,6 +1,16 @@
 #include "stable.c"
 #include <ctype.h>
 
+char words[1000][100];
+static int print(const char *key, EntryData *data){
+    if(key != NULL && data != NULL){
+        printf("%s\t\t%d\n", key, data->i);
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
 int main(int argc, char *argv[]){
     FILE *file, *file2;
     SymbolTable st;
@@ -18,17 +28,17 @@ int main(int argc, char *argv[]){
     if(argc>2){
         perror("Too much arguments. Only one argument is needed.");
         return(-1);
-    }   
+    }
     file = fopen(argv[1], "r");//file for inserting on stable
-    file2 = fopen(argv[1], "r");//file for counting words array indexes
-    if(file ==  NULL || file2 == NULL)
+    file2 = fopen(argv[1], "r");//file for counting words array indexes   
+    if(file2 == NULL)
     {
         perror("Error in opening file.");
         return (-1);
     }  
     st = stable_create();
 
-    while(1){//words array indexes counter block
+    /*while(1){//words array indexes counter block
         int i = 0;//auxiliary counter
         char ch = (char)fgetc(file2);
         while(!isblank(ch) && !feof(file2) && ch != '\n' && ch != '\t'){
@@ -41,13 +51,12 @@ int main(int argc, char *argv[]){
             if(i>max_length) max_length = i;  
             flag = 0;//reset the flag
         }
-        if(feof(file2)){           
+        if(feof(file2)){          
             break;
         }            
     }
-    fclose(file2);
-
-    char words[max_words][max_length+1];
+    fclose(file2);  
+    char words[max_words][max_length+1];*/
     while(1){
         char ch = (char)fgetc(file);
         index = 0;
@@ -73,7 +82,7 @@ int main(int argc, char *argv[]){
         }
         textIndex++;
     }
-    index = stable_visit(st, 0);   
+    index = stable_visit(st, print);   
     fclose(file);
     stable_destroy(st);
 }
