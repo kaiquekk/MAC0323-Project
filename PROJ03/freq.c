@@ -1,8 +1,6 @@
 #include "stable.c"
 #include <ctype.h>
 #include <string.h>
-#define MAX_WORDS 2000
-#define MAX_LENGTH 200
 
 const char **keys; //'array' of strings
 int *vals; //'array' of vals
@@ -105,5 +103,9 @@ int main(int argc, char *argv[]){
         printf("%d\n", vals[i]);
     }
     fclose(file);
+    /*EntryData *data = stable_find(st, "very");
+    printf("%d", data->i);*/
     stable_destroy(st);
+    /*data = stable_find(st, "very");
+    printf("%d", data->i);*/
 }
