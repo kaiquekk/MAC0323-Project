@@ -4,7 +4,7 @@
 #define MAX_WORDS 2000
 #define MAX_LENGTH 200
 
-const char **keys; //'array' os strings
+const char **keys; //'array' of strings
 int *vals; //'array' of vals
 int index; //global counter for print function
 unsigned int maxLength = 0; //maximum length of all the keys
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
     int index, flag, textIndex;
     flag = 0;
     textIndex = 0;
-    aux = (char*)malloc(sizeof(char));
+    aux = (char*)malloc(sizeof(char));//auxiliary pointer
     if(argc==1){
         perror("Missing arguments in command line.");
         return (-1);
@@ -77,14 +77,14 @@ int main(int argc, char *argv[]){
         }
         if(flag == 1){
             aux[index++] = 0; //make last character of string null
-            char *tmp =  malloc(sizeof(char)*index);
-            strcpy(tmp, aux);
-            ir = stable_insert(st, tmp);
+            char *tmp =  malloc(sizeof(char)*index);//alloc memory for the new word read
+            strcpy(tmp, aux);//copy the content of the auxiliary pointer to the new allocated memory
+            ir = stable_insert(st, tmp);//insert the new word in the symbol table
             if(ir.new == 0){//if it is not a new entry on the stable
-                ir.data->i++;
+                ir.data->i++;//increment the value of the given key by 1
             }
             else{//if it is a new entry on the stable
-                ir.data->i = 1;                
+                ir.data->i = 1;//set the value of the given key to 1            
             }
             flag = 0;//reset the flag
         }
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
         }
         textIndex++;
     }    
-    free(aux);
+    free(aux);//free the auxiliary char pointer
     keys = malloc(sizeof(char**) * (st->n+1));
     vals = malloc(sizeof(int) * (st->n+1));
     index = 0;
