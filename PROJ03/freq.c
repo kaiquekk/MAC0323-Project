@@ -3,6 +3,7 @@
 #include <string.h>
 #define MAX_WORDS 2000
 #define MAX_LENGTH 200
+
 const char **keys; //'array' os strings
 int *vals; //'array' of vals
 int index; //global counter for print function
@@ -46,10 +47,11 @@ int main(int argc, char *argv[]){
     FILE *file;
     SymbolTable st;
     InsertionResult ir;
-    char words[MAX_WORDS][MAX_LENGTH];
+    char *aux;
     int index, flag, textIndex;
     flag = 0;
     textIndex = 0;
+    aux = (char*)malloc(sizeof(char));
     if(argc==1){
         perror("Missing arguments in command line.");
         return (-1);
@@ -69,13 +71,15 @@ int main(int argc, char *argv[]){
         index = 0;
         while(!isblank(ch) && !feof(file) && ch != '\n' && ch != '\t'){
             //read until blank space, new line, tab or EOF
-            words[textIndex][index++] = ch;//store in array            
+            aux[index++] = ch;//store in auxiliary char array   
             ch = (char)fgetc(file);
             flag = 1;//setup flag to evade multiple blank spaces counting as a word
         }
         if(flag == 1){
-            words[textIndex][index]=0; //make last character of string null 
-            ir = stable_insert(st, words[textIndex]);
+            aux[index++] = 0; //make last character of string null
+            char *tmp =  malloc(sizeof(char)*index);
+            strcpy(tmp, aux);
+            ir = stable_insert(st, tmp);
             if(ir.new == 0){//if it is not a new entry on the stable
                 ir.data->i++;
             }
@@ -89,6 +93,7 @@ int main(int argc, char *argv[]){
         }
         textIndex++;
     }    
+    free(aux);
     keys = malloc(sizeof(char**) * (st->n+1));
     vals = malloc(sizeof(int) * (st->n+1));
     index = 0;

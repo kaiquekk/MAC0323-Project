@@ -78,6 +78,7 @@ InsertionResult stable_insert(SymbolTable table, const char *key){
             table->n++;
         }
     }
+    //printf("INserted %s\n", table->hash[h].head->key);
     return ir;
 }
 EntryData *stable_find(SymbolTable table, const char *key){
