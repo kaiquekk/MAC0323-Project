@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stable.h"
-#define M 23 /*Change the M value for the hash function*/
+#define M 7 /*Change the M value for the hash function*/
 
 typedef struct node{
     const char *key;
@@ -39,8 +39,19 @@ static node_t *createNode(const char* str, node_t *head){//allocate memory and i
     node->next = head;
     return node;
 }
-void stable_destroy(SymbolTable table){
-    memset(table, 0, sizeof(struct stable_s));
+void stable_destroy(SymbolTable table){    
+    for (int i = 0; i < M; i++){
+        node_t *current = table->hash[i].head;
+        while(current != NULL){    
+            /*destroy the EntryData of each node*/
+            memset(current->data, 0, sizeof(EntryData));
+            free(current->data); 
+            memset(current, 0, sizeof(node_t));
+            free(current);         
+            current = current->next;            
+        }
+    }
+    memset(table, 0, sizeof(struct stable_s));    
     free(table);
 }
 static int hash(const char *key, int m){//modular hash function
