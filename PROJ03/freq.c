@@ -103,9 +103,5 @@ int main(int argc, char *argv[]){
         printf("%d\n", vals[i]);
     }
     fclose(file);
-    /*EntryData *data = stable_find(st, "very");
-    printf("%d", data->i);*/
     stable_destroy(st);
-    /*data = stable_find(st, "very");
-    printf("%d", data->i);*/
 }
