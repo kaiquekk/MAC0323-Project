@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "parser.h"
+#include "error.h"
+#include "optable.c"
+
 /*This function split the line, creating a bidimensional array with the strings
 that do not have blank spaces*/
 static char** split(const char *str){
@@ -27,11 +31,60 @@ static char** split(const char *str){
     }
     return words;
 }
+
+int label_check(char *label){//check if the label is valid
+
+}
+
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
-    Instruction *new = malloc(sizeof(Instruction*));
-    
+    Instruction *newInstr = emalloc(sizeof(Instruction*));   
+    char *tokAux;
+    char *tokens[3];
+    char *s_copy = emalloc(sizeof(s));
+    strcpy(s_copy, s);
+    tokAux = strtok(s_copy, " ");
+    int i = 0;
+    while(tokAux!=NULL && i<3){//maximum strings to consider on a line: label, operand and value
+        tokens[i++] = tokAux;
+        tokAux = strtok(NULL, " ");
+    }
+    if(i<3){//line has no label or can be a "label NOP" line
+        if(strcmp(tokens[1], "NOP") == 0){//line is "label NOP"
+            if(label_check(tokens[0]) == 0){//label is invalid
+                set_error_msg("invalid label name");
+                errptr = "0";//coloquei apontando pro inicio da linha pois n sei como fazer o controle corretamente com a implementação do strtok
+                return 0;
+            }
+            else{
+                //fill instruction newInstr 
+                newInstr->label = emmalloc(sizeof(tokens[0]));
+                strcpy(newInstr->label, tokens[0]);
+                newInstr->op = optable_find(tokens[1]);
+                //newInstr->lineno ?
+                //newInstr->pos ?
+                Instruction *iptr = instr;
+                while(iptr->next != NULL){
+                    iptr = iptr->next;                    
+                }
+                iptr->next = newInstr;
+                return 1;
+            }
+        }
+        const Operator *op = optable_find(tokens[0]);
+        if(op==NULL){
+            set_error_msg("invalid operator");
+            errptr = "0";
+            return 0;
+        }
+        else{
+            
+        }
+    }    
 }
+
 int main(int argc, char *argv[]){
+    
+    return 0;
     
 }
