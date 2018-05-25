@@ -36,6 +36,26 @@ int label_check(char *label){//check if the label is valid
 
 }
 
+/*Casos:
+    2 palavras:
+        - label NOP
+            - checar se a label é válida
+                - label começa com uma letra ou underscore, contendo apenas letras, numeros e underscores e não é um nome de operador
+                - label não é o "nome" de um Registrador atribuido pelo operador IS 
+        - OPERADOR Operandos
+            - checar se o operador existe na optable
+            - checar se os operandos sao validos de acordo com o operador
+    3 palvras:
+        - label OPERADOR Operandos
+            - checar se a label é valida
+            - checar se o operador existe na optable
+            - checar se os operandos sao validos de acordo com o operador
+        - nome IS Registrador    
+            - checar se nome ja existe na stable
+            - checar se nome é um nome valido
+            - adicionar na stable nome com o devido registrador
+*/
+
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
     char **tokens = split(s);
