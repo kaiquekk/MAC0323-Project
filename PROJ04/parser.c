@@ -1,9 +1,8 @@
 #include <stdio.h>
 /*This function split the line, creating a bidimensional array with the strings
 that do not have blank spaces*/
-static **char split(){
+static **char split(const char *str){
     char **words = malloc(sizeof(char**));
-    char *str = "Teste     com    split.";
     int len = strlen(str);
     char *tmp = (char*)malloc(sizeof(char)*len);
     for(int i = 0, j = 0, wordCounter = 0; i < len; i++){
