@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "parser.h"
 /*This function split the line, creating a bidimensional array with the strings
 that do not have blank spaces*/
 static char** split(const char *str){
@@ -24,12 +25,13 @@ static char** split(const char *str){
             tmp[j++] = str[i];
         }
     }
+    return words;
 }
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
     Instruction *new = malloc(sizeof(Instruction*));
     
 }
-int main(){
+int main(int argc, char *argv[]){
     
 }
