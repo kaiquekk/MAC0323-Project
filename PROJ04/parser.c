@@ -58,10 +58,16 @@ int label_check(char *label){//check if the label is valid
 
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
-    char **tokens = split(s);
-    printf("%d", strlen(tokens));
-    for(int i = 0; i < strlen(tokens); i++){
-        printf("%s\n", tokens[i]);
+    char **words = split(s);
+    char **tokens = malloc(sizeof(char**));
+    for(unsigned int i = 0, tokenCounter; i < strlen(s); i++){
+        //eliminating the chars that haven't importance to lexical analysis
+        if(words[i] == NULL || strcmp(words[i], "*") == 0 || words[i][0] == '*'){
+            break;
+        }       
+        tokens[tokenCounter] = (char*)malloc(sizeof(char*));
+        strcpy(tokens[tokenCounter++], words[i]);
+        printf("%s\n", tokens[tokenCounter-1]);
     }
 
     /*Instruction *newInstr = emalloc(sizeof(Instruction*));   
