@@ -19,8 +19,8 @@ static char** split(const char *str){
         if(isspace(str[i]) || i == len-1){
             if(j > 0){
                 words[wordCounter] = (char*)malloc(sizeof(char)*(j+1));                
-                words[wordCounter++] = tmp;
-                free(tmp);
+                strcpy(words[wordCounter], tmp);
+                wordCounter++;
                 tmp = (char*)malloc(sizeof(char)*len);
                 j = 0;
             }
@@ -38,7 +38,13 @@ int label_check(char *label){//check if the label is valid
 
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
-    Instruction *newInstr = emalloc(sizeof(Instruction*));   
+    char **tokens = split(s);
+    printf("%d", strlen(tokens));
+    for(int i = 0; i < strlen(tokens); i++){
+        printf("%s\n", tokens[i]);
+    }
+
+    /*Instruction *newInstr = emalloc(sizeof(Instruction*));   
     char *tokAux;
     char *tokens[3];
     char *s_copy = emalloc(sizeof(s));
@@ -80,11 +86,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         else{
             
         }
-    }    
+    }  */  
 }
 
 int main(int argc, char *argv[]){
-    
-    return 0;
-    
+    parse("loop  MUL  a,a,2  * Faz multiplicacao\n", NULL, NULL, NULL);
+    return 0;    
 }
