@@ -60,16 +60,41 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
     char **words = split(s);
     char **tokens = malloc(sizeof(char**));
-    for(unsigned int i = 0, tokenCounter; i < strlen(s); i++){
+    int tokenCounter = 0;
+    for(unsigned int i = 0; i < strlen(s); i++){
         //eliminating the chars that haven't importance to lexical analysis
         if(words[i] == NULL || strcmp(words[i], "*") == 0 || words[i][0] == '*'){
             break;
         }       
         tokens[tokenCounter] = (char*)malloc(sizeof(char*));
         strcpy(tokens[tokenCounter++], words[i]);
-        printf("%s\n", tokens[tokenCounter-1]);
+        //printf("%s\n", tokens[tokenCounter-1]);
     }
-
+    if(tokenCounter == 0 || tokenCounter == 1){
+        /*has not tokens or a has insufficiently tokens number\*/
+        printf("has not tokens or a has insufficiently tokens number\n");
+    }
+    else{
+        if(optable_find(tokens[0]) == NULL){
+            /*that means the first string is not a operator, so the second needs to be a operator*/
+            if(optable_find(tokens[1]) == NULL){
+                /*ERROR: expected operator*/
+                printf("ERROR: expected operator\n");
+            }
+            else{
+                /*structure found: label - operator*/
+                /*So the third string needs to be analysed*/
+                Operator *opToken = optable_find(tokens[1]);
+                printf("Operator: %s\n", opToken->name);
+                /*Now is necessary to verify the syntax of operator command*/
+            }
+        }
+        else{
+            /*that means the first string is a operator, so now it needs to be analysed*/
+            printf("that means the first string is a operator, so now it needs to be analysed\n");
+        }
+    }
+    
     /*Instruction *newInstr = emalloc(sizeof(Instruction*));   
     char *tokAux;
     char *tokens[3];
