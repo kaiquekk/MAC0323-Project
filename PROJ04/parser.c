@@ -32,10 +32,6 @@ static char** split(const char *str){
     return words;
 }
 
-int label_check(char *label){//check if the label is valid
-
-}
-
 /*Casos:
     2 palavras:
         - label NOP
