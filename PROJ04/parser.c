@@ -164,5 +164,6 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
 }
 
 int main(int argc, char *argv[]){
+    parse("loop     MUL   a, b, 0  * Faz multiplicacao\n", NULL, NULL, NULL);
     return 0;    
 }
