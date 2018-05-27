@@ -8,6 +8,8 @@
 
 /*This function split the line, creating a bidimensional array with the strings
 that do not have blank spaces*/
+int tokenCounter = 0; /*the number of Operand in the line(the real number, and not (number-1))*/
+
 static char** split(const char *str){
     char **words = malloc(sizeof(char**));
     int len = strlen(str);
@@ -31,7 +33,61 @@ static char** split(const char *str){
     }
     return words;
 }
-
+static char** operandsFinder(const char *str, unsigned int index){
+    char **token = malloc(sizeof(char**));
+    char *tmp = malloc(sizeof(char)*strlen(str));
+    int tmpCounter = 0; //charCounter to tmp
+    int tokenCounter = 0; //token Counter to token
+    int space = 0;//flag to identifies the space
+    strcpy(tmp, "");
+    for(unsigned int i = index; i < strlen(str); i++){
+        if(isspace(str[i])){
+            if(strcmp("", tmp) == 0){
+                continue;
+            }
+            else{
+                space = 1;                
+            }
+        }
+        else if(str[i] == '*'){
+            if(strcmp("", tmp) == 0){
+                /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
+                printf("ERROR: OPERAND EXPECTED");
+            }
+            token[tokenCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
+            strcpy(token[tokenCounter++], tmp); //put the tmp in the token array
+            printf("%s\n", token[tokenCounter-1]);
+            strcpy(tmp, ""); //reset the tmp string
+            tmpCounter = 0;
+            space = 0;
+            break;
+        }
+        else if(str[i] == ','){
+            if(strcmp("", tmp) == 0){
+                /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
+                printf("ERROR: OPERAND EXPECTED");
+            }
+            printf("ERROR: OPERAND EXPECTED");
+            token[tokenCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
+            strcpy(token[tokenCounter++], tmp); //put the tmp in the token array
+            printf("%s\n", token[tokenCounter-1]);
+            strcpy(tmp, ""); //reset the tmp string
+            tmpCounter = 0;
+            space = 0;
+        }
+        else{
+            if(space == 1){
+                /*ERROR: TWO OPERANDS AT THE SAME BLOCK OF OPERANDS*/
+                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
+                printf("ERROR: TWO OPERANDS AT THE SAME BLOCK OF OPERANDS\n");
+            }
+            else{
+                tmp[tmpCounter++] = str[i];
+            }
+        }
+    }
+    return token;
+}
 /*Casos:
     2 palavras:
         - label NOP
@@ -54,89 +110,59 @@ static char** split(const char *str){
 
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
-    char **words = split(s);
-    char **tokens = malloc(sizeof(char**));
-    int tokenCounter = 0;
-    for(unsigned int i = 0; i < strlen(s); i++){
-        //eliminating the chars that haven't importance to lexical analysis
-        if(words[i] == NULL || strcmp(words[i], "*") == 0 || words[i][0] == '*'){
+    char **token = malloc(sizeof(char**));
+    char *firstStr = (char*)malloc(sizeof(char)*strlen(str));    
+    int firstStrCounter = 0, endOfFirstStr = 0;
+    //firstStr = first string of line
+    //firstStrCounter = length of first string of line
+    //endOfFirstString = index of next char that does not belong of firstString
+    char *secondStr = (char*)malloc(sizeof(char)*strlen(str));    
+    int secondStrCounter = 0, endOfSecondStr = 0;
+    strcpy(firstStr, "");
+    strcpy(secondStr, "");
+    for(unsigned int i = 0; i < strlen(str); i++){
+        /*Identifies the first string before a space char*/
+        if(isspace(str[i]) && strcmp(firstStr, "") != 0){
+            endOfFirstStr = i+1;
             break;
-        }       
-        tokens[tokenCounter] = (char*)malloc(sizeof(char*));
-        strcpy(tokens[tokenCounter++], words[i]);
-        //printf("%s\n", tokens[tokenCounter-1]);
+        }
+        if(isspace(str[i]) && strcmp(firstStr, "") == 0){
+            continue;
+        }
+        firstStr[firstStrCounter++] = str[i];
     }
-    if(tokenCounter == 0 || tokenCounter == 1){
-        /*has not tokens or a has insufficiently tokens number\*/
-        printf("has not tokens or a has insufficiently tokens number\n");
+    /*Now, the first string was found, and is necessary to know if it is a label or a operator*/
+    if(optable_find(firstStr) == NULL){
+        /*the first token is not a operator, so it will be assumed the first token is a LABEL*/
+        /*so the second string needs to be a operator*/
+        for(unsigned int i = endOfFirstStr; i < strlen(str); i++){
+            /*Identifies the second string before a space char*/
+            if(isspace(str[i]) && strcmp(secondStr, "") != 0){
+                endOfSecondStr = i+1;
+                break;
+            }
+            if(isspace(str[i]) && strcmp(secondStr, "") == 0){
+                continue;
+            }
+            secondStr[secondStrCounter++] = str[i];            
+        }
+        if(optable_find(secondStr) == NULL){
+            /*ERROR: EXPECTED OPERATOR*/
+            /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
+        }
+        else{
+            /*a operator was found, so the next block of strings needs to be the operands*/
+            char **operands = operandsFinder(str, endOfSecondStr);
+            printf("%s|%s|%s|%s|%s|\n", firstStr, secondStr, operands[0], operands[1], operands[2]);
+        }
     }
     else{
-        if(optable_find(tokens[0]) == NULL){
-            /*that means the first string is not a operator, so the second needs to be a operator*/
-            if(optable_find(tokens[1]) == NULL){
-                /*ERROR: expected operator*/
-                printf("ERROR: expected operator\n");
-            }
-            else{
-                /*structure found: label - operator*/
-                /*So the third string needs to be analysed*/
-                Operator *opToken = optable_find(tokens[1]);
-                printf("Operator: %s\n", opToken->name);
-                /*Now is necessary to verify the syntax of operator command*/
-            }
-        }
-        else{
-            /*that means the first string is a operator, so now it needs to be analysed*/
-            printf("that means the first string is a operator, so now it needs to be analysed\n");
-        }
+        /*the first token is a OPERATOR, so the second block of strings needs to be the OPERANDS*/
+        char **operands = operandsFinder(str, endOfSecondStr);
+        printf("%s|%s|%s|%s|%s|\n", firstStr, secondStr, operands[0], operands[1], operands[2]);
     }
-    
-    /*Instruction *newInstr = emalloc(sizeof(Instruction*));   
-    char *tokAux;
-    char *tokens[3];
-    char *s_copy = emalloc(sizeof(s));
-    strcpy(s_copy, s);
-    tokAux = strtok(s_copy, " ");
-    int i = 0;
-    while(tokAux!=NULL && i<3){//maximum strings to consider on a line: label, operand and value
-        tokens[i++] = tokAux;
-        tokAux = strtok(NULL, " ");
-    }
-    if(i<3){//line has no label or can be a "label NOP" line
-        if(strcmp(tokens[1], "NOP") == 0){//line is "label NOP"
-            if(label_check(tokens[0]) == 0){//label is invalid
-                set_error_msg("invalid label name");
-                errptr = "0";//coloquei apontando pro inicio da linha pois n sei como fazer o controle corretamente com a implementação do strtok
-                return 0;
-            }
-            else{
-                //fill instruction newInstr 
-                newInstr->label = emmalloc(sizeof(tokens[0]));
-                strcpy(newInstr->label, tokens[0]);
-                newInstr->op = optable_find(tokens[1]);
-                //newInstr->lineno ?
-                //newInstr->pos ?
-                Instruction *iptr = instr;
-                while(iptr->next != NULL){
-                    iptr = iptr->next;                    
-                }
-                iptr->next = newInstr;
-                return 1;
-            }
-        }
-        const Operator *op = optable_find(tokens[0]);
-        if(op==NULL){
-            set_error_msg("invalid operator");
-            errptr = "0";
-            return 0;
-        }
-        else{
-            
-        }
-    }  */  
 }
 
 int main(int argc, char *argv[]){
-    parse("loop  MUL  a,a,2  * Faz multiplicacao\n", NULL, NULL, NULL);
     return 0;    
 }
