@@ -8,15 +8,15 @@
 
 /*This function split the line, creating a bidimensional array with the strings
 that do not have blank spaces*/
-int tokenCounter = 0; /*the number of Operand in the line(the real number, and not (number-1))*/
+int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
 
 static char** operandsFinder(const char *str, unsigned int index){
     char **token = malloc(sizeof(char**));
     char *tmp = malloc(sizeof(char)*strlen(str));
     int tmpCounter = 0; //charCounter to tmp
-    int tokenCounter = 0; //token Counter to token
     int space = 0;//flag to identifies the space
     strcpy(tmp, "");
+    operandsCounter = 0; //initializing the counter variable
     for(unsigned int i = index; i < strlen(str); i++){
         if(isspace(str[i])){
             if(strcmp("", tmp) == 0){
@@ -31,9 +31,8 @@ static char** operandsFinder(const char *str, unsigned int index){
                 /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
                 printf("ERROR: OPERAND EXPECTED");
             }
-            token[tokenCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
-            strcpy(token[tokenCounter++], tmp); //put the tmp in the token array
-            printf("%s\n", token[tokenCounter-1]);
+            token[operandsCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
+            strcpy(token[operandsCounter++], tmp); //put the tmp in the token array
             strcpy(tmp, ""); //reset the tmp string
             tmpCounter = 0;
             space = 0;
@@ -44,9 +43,9 @@ static char** operandsFinder(const char *str, unsigned int index){
                 /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
                 printf("ERROR: OPERAND EXPECTED");
             }
-            token[tokenCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
-            strcpy(token[tokenCounter++], tmp); //put the tmp in the token array
-            printf("%s\n", token[tokenCounter-1]);
+            token[operandsCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
+            strcpy(token[operandsCounter++], tmp); //put the tmp in the token array
+            printf("%s\n", token[operandsCounter-1]);
             strcpy(tmp, ""); //reset the tmp string
             tmpCounter = 0;
             space = 0;
@@ -131,10 +130,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         else{
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(str, endOfSecondStr);
-            new
-
-
-
+            printf("OperandsCounter = %d\n", operandsCounter);
             printf("%s|%s|%s|%s|%s|\n", firstStr, secondStr, operands[0], operands[1], operands[2]);
         }
     }
@@ -146,6 +142,6 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
 }
 
 int main(int argc, char *argv[]){
-    parse("loop     MUL   a, b, 0  * Faz multiplicacao\n", NULL, NULL, NULL);
+    parse("loop     MUL   a, b,  0  * Faz multiplicacao\n", NULL, NULL, NULL);
     return 0;    
 }
