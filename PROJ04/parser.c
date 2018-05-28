@@ -11,7 +11,36 @@ that do not have blank spaces*/
 int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
 
 static char** operandsAnalyser(const char *str, unsigned int index){
-    
+    char *str = "$58";
+    /*verifies if the operand is a register*/
+    if(str[0] == '$'){
+        if(strlen(str) == 1){
+            /*ERROR: $ EXPECTED NUMBER OF REGISTER*/
+            /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+        }
+        else{
+            int value = 0;
+            int pot = 1;
+            for(int i = strlen(str)-1; i > 0; i--){
+                if(str[i] < '0' || str[i] > '9'){
+                    /*ERROR: $ INVALID REGISTER*/
+                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+                }
+                else{
+                    value += pot*(str[i] - 48);
+                    pot *= 10;
+                }
+            }
+            printf("Value %d", value);
+            if(value > 255){
+                /*ERROR: $ INVALID REGISTER*/
+                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+            }
+            else{
+                RETURN REGISTER;
+            }
+        }        
+    }
 }
 
 static char** operandsFinder(const char *str, unsigned int index){
