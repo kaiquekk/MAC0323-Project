@@ -10,6 +10,10 @@
 that do not have blank spaces*/
 int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
 
+static char** operandsAnalyser(const char *str, unsigned int index){
+    
+}
+
 static char** operandsFinder(const char *str, unsigned int index){
     char **token = malloc(sizeof(char**));
     char *tmp = malloc(sizeof(char)*strlen(str));
@@ -29,6 +33,7 @@ static char** operandsFinder(const char *str, unsigned int index){
         else if(str[i] == '*'){
             if(strcmp("", tmp) == 0){
                 /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
+                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
                 printf("ERROR: OPERAND EXPECTED");
             }
             token[operandsCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
@@ -63,25 +68,6 @@ static char** operandsFinder(const char *str, unsigned int index){
     }
     return token;
 }
-/*Casos:
-    2 palavras:
-        - label NOP
-            - checar se a label é válida
-                - label começa com uma letra ou underscore, contendo apenas letras, numeros e underscores e não é um nome de operador
-                - label não é o "nome" de um Registrador atribuido pelo operador IS 
-        - OPERADOR Operandos
-            - checar se o operador existe na optable
-            - checar se os operandos sao validos de acordo com o operador
-    3 palvras:
-        - label OPERADOR Operandos
-            - checar se a label é valida
-            - checar se o operador existe na optable
-            - checar se os operandos sao validos de acordo com o operador
-        - nome IS Registrador    
-            - checar se nome ja existe na stable
-            - checar se nome é um nome valido
-            - adicionar na stable nome com o devido registrador
-*/
 
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
@@ -130,6 +116,26 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         else{
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(str, endOfSecondStr);
+            Operator* opFound = optable_find(secondStr);            
+            int opFoundNumberOperands = 0;
+            for(int i = 0; i; i++){
+                if(opFound->opd_types[i] == NULL){
+                    /*now is necessary check if the operands number is correct*/
+                    if(operandsCounter == i){
+                        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
+                        /*CREATE NEW INSTRUCTION*/
+                    }
+                    else{
+                        /*ERROR: TOO MANY ARGUMENTS*/
+                        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
+                    }
+                }
+                else if(operandsCounter < i){
+                    /*ERROR: TOO FEW ARGUMENTS*/
+                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
+                }
+                else if()
+            }
             printf("OperandsCounter = %d\n", operandsCounter);
             printf("%s|%s|%s|%s|%s|\n", firstStr, secondStr, operands[0], operands[1], operands[2]);
         }
@@ -139,6 +145,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         char **operands = operandsFinder(str, endOfSecondStr);
         printf("%s|%s|%s|%s|%s|\n", firstStr, secondStr, operands[0], operands[1], operands[2]);
     }
+    return 0;
 }
 
 int main(int argc, char *argv[]){
