@@ -175,25 +175,17 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             char **operands = operandsFinder(str, endOfSecondStr);
             Operator* opFound = optable_find(secondStr);            
             int opFoundNumberOperands = 0;
-            for(int i = 0; i == i; i++){                
-                if(opFound->opd_types[i] == NULL){
-                    /*now is necessary check if the operands number is correct*/
-                    if(operandsCounter == i){
-                        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
-                        /*CREATE NEW INSTRUCTION*/
-                    }
-                    else{
-                        /*ERROR: TOO MANY ARGUMENTS*/
-                        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
-                    }
-                    break;
-                }
-                else if(operandsCounter < i){
-                    /*ERROR: TOO FEW ARGUMENTS*/
+            for(int i = 0; i == i; i++){  
+                printf("%d\n", opFound->opd_types[i]);              
+                if(operandsCounter == 3){                        
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
-                }
+                    /*CREATE NEW INSTRUCTION*/
+                    printf("CREATE NEW INSTRUCTION\n");
+                    break;
+                }                
                 else{
                     /*CHECK IF THE OPERAND TYPES ARE OK*/
+                    printf("CHECK IF THE OPERAND TYPES ARE OK\n");
                 }
             }
             printf("OperandsCounter = %d\n", operandsCounter);
