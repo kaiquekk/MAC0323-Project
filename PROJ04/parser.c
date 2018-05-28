@@ -10,29 +10,6 @@
 that do not have blank spaces*/
 int tokenCounter = 0; /*the number of Operand in the line(the real number, and not (number-1))*/
 
-static char** split(const char *str){
-    char **words = malloc(sizeof(char**));
-    int len = strlen(str);
-    char *tmp = (char*)malloc(sizeof(char)*len);
-    for(int i = 0, j = 0, wordCounter = 0; i < len; i++){
-        if(i == len-1 && !isspace(str[i])){
-            tmp[j++] = str[i];
-        }
-        if(isspace(str[i]) || i == len-1){
-            if(j > 0){
-                words[wordCounter] = (char*)malloc(sizeof(char)*(j+1));                
-                strcpy(words[wordCounter], tmp);
-                wordCounter++;
-                tmp = (char*)malloc(sizeof(char)*len);
-                j = 0;
-            }
-        }
-        else{
-            tmp[j++] = str[i];
-        }
-    }
-    return words;
-}
 static char** operandsFinder(const char *str, unsigned int index){
     char **token = malloc(sizeof(char**));
     char *tmp = malloc(sizeof(char)*strlen(str));
@@ -154,6 +131,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         else{
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(str, endOfSecondStr);
+            new
+
+
+
             printf("%s|%s|%s|%s|%s|\n", firstStr, secondStr, operands[0], operands[1], operands[2]);
         }
     }
