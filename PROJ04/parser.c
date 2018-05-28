@@ -10,16 +10,16 @@
 that do not have blank spaces*/
 int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
 
-static char** operandsAnalyser(const char *str, unsigned int index){
-    char *str = "$58";
-    /*verifies if the operand is a register*/
+static char** operandsAnalyser(const char *str, SymbolTable alias_table, 
+                              Instruction **instr, unsigned int index){
+    /*VERIFICATION 1: REGISTER*/
     if(str[0] == '$'){
         if(strlen(str) == 1){
             /*ERROR: $ EXPECTED NUMBER OF REGISTER*/
             /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
         }
         else{
-            int value = 0;
+            int value = 0; //value is the register number
             int pot = 1;
             for(int i = strlen(str)-1; i > 0; i--){
                 if(str[i] < '0' || str[i] > '9'){
@@ -31,16 +31,44 @@ static char** operandsAnalyser(const char *str, unsigned int index){
                     pot *= 10;
                 }
             }
-            printf("Value %d", value);
             if(value > 255){
                 /*ERROR: $ INVALID REGISTER*/
                 /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
             }
             else{
-                RETURN REGISTER;
+                /*RETURN REGISTER;*/
+                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
             }
         }        
     }
+    /*VERIFICATION 2: LABEL*/
+    Instruction *current = *instr;
+    while(current != NULL){
+        if(current->label != NULL && strcmp(current->label, str) == 0){
+            /*RETURN LABEL;*/
+            /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+        }
+        current = current->next;
+    }
+    /*VERIFICATION 3: REGISTER ALIAS*/
+    if(stable_find(alias_table, str) != NULL){
+        /*RETURN REGISTER ALIAS*/
+        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+    }
+    int value = 0; //value is the number
+    int pot = 1;
+    for(int i = strlen(str)-1; i >= 0; i--){
+        if(str[i] < '0' || str[i] > '9'){
+            /*ERROR: INVALID OPERAND*/ /*GERAL CASE*/
+            /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+        }
+        else{
+            value += pot*(str[i] - 48);
+            pot *= 10;
+        }
+    }
+    /*RETURN NUMBER*/
+    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
 }
 
 static char** operandsFinder(const char *str, unsigned int index){
@@ -147,7 +175,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             char **operands = operandsFinder(str, endOfSecondStr);
             Operator* opFound = optable_find(secondStr);            
             int opFoundNumberOperands = 0;
-            for(int i = 0; i; i++){
+            for(int i = 0; i == i; i++){                
                 if(opFound->opd_types[i] == NULL){
                     /*now is necessary check if the operands number is correct*/
                     if(operandsCounter == i){
@@ -158,12 +186,15 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         /*ERROR: TOO MANY ARGUMENTS*/
                         /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
                     }
+                    break;
                 }
                 else if(operandsCounter < i){
                     /*ERROR: TOO FEW ARGUMENTS*/
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
                 }
-                else if()
+                else{
+                    /*CHECK IF THE OPERAND TYPES ARE OK*/
+                }
             }
             printf("OperandsCounter = %d\n", operandsCounter);
             printf("%s|%s|%s|%s|%s|\n", firstStr, secondStr, operands[0], operands[1], operands[2]);
