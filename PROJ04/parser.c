@@ -187,10 +187,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 }
             }            
             Operator* opFound = optable_find(secondStr);            
-            int opFoundNumberOperands = 0;
-            for(int i = 0; i == i; i++){  
+            for(int i = 0; i <= 3; i++){  
                 printf("%d\n", opFound->opd_types[i]);              
-                if(operandsCounter == 3){                        
+                if(i == 3){                        
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
                     /*CREATE NEW INSTRUCTION*/
                     printf("CREATE NEW INSTRUCTION\n");
