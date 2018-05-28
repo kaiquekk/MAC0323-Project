@@ -10,7 +10,20 @@
 that do not have blank spaces*/
 int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
 
-static char** operandsAnalyser(const char *str, SymbolTable alias_table, 
+/*operands counter*/
+static int operandsInOperator(Operator *op){ 
+    int count;
+    for(count = 0; count < 3; count++){
+        if(op->opd_types[count] == OP_NONE){
+            break;
+        }
+    }
+    printf("Count: %d", count);
+    return count;
+}
+
+/*Analysis of operands*/
+static OperandType operandsAnalyser(const char *str, SymbolTable alias_table, 
                               Instruction **instr, unsigned int index){
     /*VERIFICATION 1: REGISTER*/
     if(str[0] == '$'){
@@ -173,20 +186,20 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         else{
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(str, endOfSecondStr);
+            Operator* opFound = optable_find(secondStr);                
             /*number of operands validation*/
-            if(operandsCounter != 3){
-                if(operandsCounter < 3){
+            if(operandsCounter != operandsInOperator(opFound)){
+                if(operandsCounter < operandsInOperator(opFound)){
                     /*ERROR: TOO FEW OPERANDS*/
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/                
                     printf("ERROR: TOO FEW OPERANDS\n");
                 }
-                else if(operandsCounter > 3){
+                else if(operandsCounter > operandsInOperator(opFound)){
                     /*ERROR: TOO MANY OPERANDS*/
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/      
                     printf("ERROR: TOO MANY OPERANDS\n");    
                 }
-            }            
-            Operator* opFound = optable_find(secondStr);            
+            }                   
             for(int i = 0; i <= 3; i++){  
                 printf("%d\n", opFound->opd_types[i]);              
                 if(i == 3){                        
