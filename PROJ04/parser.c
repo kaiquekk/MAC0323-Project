@@ -67,7 +67,6 @@ static char** operandsFinder(const char *str, unsigned int index){
                 /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
                 printf("ERROR: OPERAND EXPECTED");
             }
-            printf("ERROR: OPERAND EXPECTED");
             token[tokenCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
             strcpy(token[tokenCounter++], tmp); //put the tmp in the token array
             printf("%s\n", token[tokenCounter-1]);
@@ -110,6 +109,8 @@ static char** operandsFinder(const char *str, unsigned int index){
 
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
+    char *str = (char*)malloc(sizeof(char)*strlen(s));
+    strcpy(str, s);
     char **token = malloc(sizeof(char**));
     char *firstStr = (char*)malloc(sizeof(char)*strlen(str));    
     int firstStrCounter = 0, endOfFirstStr = 0;
