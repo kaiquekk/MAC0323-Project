@@ -173,6 +173,19 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         else{
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(str, endOfSecondStr);
+            /*number of operands validation*/
+            if(operandsCounter != 3){
+                if(operandsCounter < 3){
+                    /*ERROR: TOO FEW OPERANDS*/
+                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/                
+                    printf("ERROR: TOO FEW OPERANDS\n");
+                }
+                else if(operandsCounter > 3){
+                    /*ERROR: TOO MANY OPERANDS*/
+                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/      
+                    printf("ERROR: TOO MANY OPERANDS\n");    
+                }
+            }            
             Operator* opFound = optable_find(secondStr);            
             int opFoundNumberOperands = 0;
             for(int i = 0; i == i; i++){  
@@ -186,6 +199,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 else{
                     /*CHECK IF THE OPERAND TYPES ARE OK*/
                     printf("CHECK IF THE OPERAND TYPES ARE OK\n");
+                    operandsCounter++;
                 }
             }
             printf("OperandsCounter = %d\n", operandsCounter);
@@ -201,6 +215,6 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
 }
 
 int main(int argc, char *argv[]){
-    parse("loop     MUL   a, b,  0  * Faz multiplicacao\n", NULL, NULL, NULL);
+    parse("loop     MUL   a, b, 0* Faz multiplicacao\n", NULL, NULL, NULL);
     return 0;    
 }
