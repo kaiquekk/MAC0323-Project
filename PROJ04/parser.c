@@ -77,7 +77,12 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
             printf("ERROR: INVALID STRING\n");
         }
     }
-    /*VERIFICATION 3: LABEL*/
+    /*VERIFICATION 3: REGISTER ALIAS*/
+    if(stable_find(alias_table, str) != NULL){        
+        printf("REGISTER ALIAS: %s | ALIAS VALUE: %d\n", str, stable_find(alias_table, str)->opd->value);
+        return REGISTER;
+    }
+    /*VERIFICATION 4: LABEL*/
     Instruction *current = *instr;
     while(current != NULL){
         if(current->label != NULL && strcmp(current->label, str) == 0){        
@@ -85,12 +90,7 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
             return LABEL;
         }
         current = current->next;        
-    }
-    /*VERIFICATION 4: REGISTER ALIAS*/
-    if(stable_find(alias_table, str) != NULL){        
-        printf("REGISTER ALIAS: %s\n", str);
-        return REGISTER;
-    }
+    }    
     /*VERIFICATION 5: NUMBER*/
     int value = 0; //value is the number
     int pot = 1;
@@ -221,7 +221,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
     }
     /*Now, the first string was found, and is necessary to know if it is a label or a operator*/
     if(optable_find(firstStr) == NULL){
-        /*the first token is not a operator, so it will be assumed the first token is a LABEL*/
+        /*the first token is not a operator, so it will be assumed the first token is a LABEL or the operator IS*/        
         /*so it's necessary to check if the label already exists*/
         Instruction *current = *instr;
         while(current != NULL){
@@ -250,6 +250,57 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             printf("ERROR: EXPECTED OPERATOR\n");
         }
         else{
+            /*CHECKING "IS": THE SPECIAL CASE*/
+            if(strcmp(secondStr, "IS") == 0){
+                Operand *newOperands[3];
+                char **operands = operandsFinder(str, endOfSecondStr);
+                Operator* opFound = optable_find(secondStr);
+                if(operandsCounter != operandsInOperator(opFound)){
+                    if(operandsCounter < operandsInOperator(opFound)){
+                        /*ERROR: TOO FEW OPERANDS*/
+                        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/                
+                        printf("ERROR: TOO FEW OPERANDS\n");
+                    }
+                    else if(operandsCounter > operandsInOperator(opFound)){
+                        /*ERROR: TOO MANY OPERANDS*/
+                            /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/      
+                         printf("ERROR: TOO MANY OPERANDS\n");    
+                    }
+                }
+                OperandType opType = operandsAnalyser(operands[0], alias_table, instr, 0);
+                if (!(opType & opFound->opd_types[0])) { // bitwise and
+                    /*ERROR: WRONG OPERAND TYPE*/
+                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/      
+                    printf("ERROR: WRONG OPERAND TYPE\n");
+                }
+                else{                    
+                    if(stable_find(alias_table, firstStr) != NULL){
+                        /*ERROR: ALIAS ALREADY EXISTS*/
+                        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/   
+                        printf("ERROR: ALIAS ALREADY EXISTS\n");   
+                    }
+                    else{
+                        stable_insert(alias_table, firstStr);
+                        EntryData *reg = stable_find(alias_table, firstStr);
+                        if(opType == REGISTER){
+                            if(operands[0][0] == '$'){
+                                reg->opd = operand_create_register(number);
+                                newOperands[0] = operand_create_register(number);
+                            }
+                        }
+                        else{
+                            reg->opd = operand_create_register(number);
+                            newOperands[0] = operand_create_register(number);
+                        }                          
+                        Instruction *new = instr_create(firstStr, opFound, newOperands);
+                        printf("label: %s | operator: %s | operandType: %d | operandType: %d | operandType: %d\n", new->label, new->op->name, new->opds[0]->type);
+                        new->next = *instr;
+                        *instr = new;
+                        printf("NEW INSTRUCTION CREATED\n");                     
+                    }                    
+                }
+                return 0;
+            }
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(str, endOfSecondStr);
             Operator* opFound = optable_find(secondStr);  
@@ -366,9 +417,11 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
 
 int main(int argc, char *argv[]){
     SymbolTable st = stable_create();   
-    stable_insert(st, "a");
+    //stable_insert(st, "a");
     Instruction **new = malloc(sizeof(Instruction**));
-    parse(" loop MUL   a , a, $1* Faz multiplicacao\n", st, new, NULL);
+    parse(" a IS $9\n", st, new, NULL);
+    parse(" b IS $10\n", st, new, NULL);
+    parse(" loop MUL   a , b, $1* Faz multiplicacao\n", st, new, NULL);
     parse(" 1 MUL   a , loop, $1* Faz multiplicacao\n", st, new, NULL);
     parse(" 2 JMP   loop*\n", st, new, NULL);
     parse(" 4 JMP   1*\n", st, new, NULL);
