@@ -12,6 +12,8 @@
 that do not have blank spaces*/
 int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
 
+int ind;
+
 /*TO OPERANDS*/
 int number;
 
@@ -23,6 +25,7 @@ static int operandsInOperator(Operator *op){
             break;
         }
     }
+    if(count==2) count++;
     return count;
 }
 
@@ -113,7 +116,8 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
     return NUMBER_TYPE;
 }
 
-static char** operandsFinder(const char *str, unsigned int index){
+static char** operandsFinder(const char *str, unsigned int index, const char **errptr){
+    ind = index;
     char **token = malloc(sizeof(char**));
     char *tmp = malloc(sizeof(char)*strlen(str));
     int tmpCounter = 0; //charCounter to tmp
@@ -125,9 +129,11 @@ static char** operandsFinder(const char *str, unsigned int index){
         if(i == strlen(str)-1){
             if(!strcmp("", tmp)){
                 set_error_msg("expected operand");
-
-                /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
-                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+                char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                memset(errorAux, ' ', ind);
+                errorAux[ind] = '^';
+                *errptr = errorAux;
+                return NULL;
             }
             token[operandsCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
             strcpy(token[operandsCounter++], tmp); //put the tmp in the token array
@@ -139,7 +145,7 @@ static char** operandsFinder(const char *str, unsigned int index){
             doubleQuotes = 0;
         }
         if(isspace(str[i])){
-            if(strcmp("", tmp) == 0){
+            if(!strcmp("", tmp)){
                 continue;
             }
             else{
@@ -148,14 +154,18 @@ static char** operandsFinder(const char *str, unsigned int index){
                 }            
                 else{
                     tmp[tmpCounter++] = str[i];
+                    ind = i;
                 }                   
             }
         }
         else if(str[i] == '*'){
-            if(strcmp("", tmp) == 0){
-                /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
-                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
-                printf("ERROR: OPERAND EXPECTED");
+            if(!strcmp("", tmp)){
+                set_error_msg("expected operand");
+                char *errorAux = (char*)emalloc(sizeof(char) * i);
+                memset(errorAux, ' ', i-1);
+                errorAux[i-1] = '^';
+                *errptr = errorAux;
+                return NULL;
             }
             token[operandsCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
             strcpy(token[operandsCounter++], tmp); //put the tmp in the token array
@@ -168,9 +178,13 @@ static char** operandsFinder(const char *str, unsigned int index){
             break;
         }
         else if(str[i] == ','){
-            if(strcmp("", tmp) == 0){
-                /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
-                printf("ERROR: OPERAND EXPECTED");
+            if(!strcmp("", tmp)){
+                set_error_msg("expected operand");
+                char *errorAux = (char*)emalloc(sizeof(char) * i);
+                memset(errorAux, ' ', i-1);
+                errorAux[i-1] = '^';
+                *errptr = errorAux;
+                return NULL;
             }
             token[operandsCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
             strcpy(token[operandsCounter++], tmp); //put the tmp in the token array
@@ -180,21 +194,26 @@ static char** operandsFinder(const char *str, unsigned int index){
             tmpCounter = 0;
             space = 0;
             doubleQuotes = 0;
+            ind = i;
         }
         else{
             if(space == 1){
-                /*ERROR: TWO OPERANDS AT THE SAME BLOCK OF OPERANDS*/
-                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
-                printf("ERROR: TWO OPERANDS AT THE SAME BLOCK OF OPERANDS\n");
+                set_error_msg("invalid operands positioning");
+                char *errorAux = (char*)emalloc(sizeof(char) * i);
+                memset(errorAux, ' ', i-1);
+                errorAux[i-1] = '^';
+                *errptr = errorAux;
+                return NULL;
             }
             else{
                 if(str[i] == '\"'){
                     doubleQuotes = 1;
                 }
                 tmp[tmpCounter++] = str[i];
+                ind = i;
             }
         }
-    }
+    } 
     return token;
 }
 
@@ -295,7 +314,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             //UNCHECKED!!
             if(!strcmp(secondStr, "IS")){
                 Operand *newOperands[3];
-                char **operands = operandsFinder(str, endOfSecondStr);
+                char **operands = operandsFinder(str, endOfSecondStr, errptr);
                 Operator* opFound = optable_find(secondStr);//IS operator
                 if(operandsCounter != operandsInOperator(opFound)){
                     if(operandsCounter < operandsInOperator(opFound)){
@@ -344,22 +363,30 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 return 0;
             }
             /*a operator was found, so the next block of strings needs to be the operands*/
-            char **operands = operandsFinder(str, endOfSecondStr);
+            char **operands = operandsFinder(str, endOfSecondStr, errptr);
+            if(operands == NULL) return 0;//error found in the operandsFinder function
             // Operator* opFound = optable_find(secondStr);  opF
             Operand *newOperands[3];        
             /*number of operands validation*/
             if(operandsCounter != operandsInOperator(opF)){
                 if(operandsCounter < operandsInOperator(opF)){
-                    /*ERROR: TOO FEW OPERANDS*/
-                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/                
-                    printf("ERROR: TOO FEW OPERANDS\n");
+                    set_error_msg("expected operand");
+                    char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                    memset(errorAux, ' ', ind);
+                    errorAux[ind] = '^';
+                    *errptr = errorAux;
+                    return 0;
+                }                
+                else if(operandsCounter > operandsInOperator(opF)){//UNCHECKED!
+                    // printf("aqui\n");
+                    set_error_msg("too many operands");
+                    char *errorAux = (char*)emalloc(sizeof(char) * ind);
+                    memset(errorAux, ' ', ind-1);
+                    errorAux[ind-1] = '^';
+                    *errptr = errorAux;  
+                    return 0;
                 }
-                else if(operandsCounter > operandsInOperator(opF)){
-                    /*ERROR: TOO MANY OPERANDS*/
-                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/      
-                    printf("ERROR: TOO MANY OPERANDS\n");    
-                }
-            }                   
+            }                
             for(int i = 0; i < operandsInOperator(opF); i++){             
                /*CHECK IF THE OPERAND TYPES ARE OK*/
                 OperandType opType = operandsAnalyser(operands[i], alias_table, instr, 0);
@@ -400,7 +427,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
     else{
         /*the first token is a OPERATOR, so the second block of strings needs to be the OPERANDS*/
         /*a operator was found, so the next block of strings needs to be the operands*/
-        char **operands = operandsFinder(str, endOfFirstStr);
+        char **operands = operandsFinder(str, endOfFirstStr, errptr);
         Operator* opFound = optable_find(firstStr);                      
         Operand *newOperands[3];
         /*number of operands validation*/
@@ -462,8 +489,8 @@ int main(int argc, char *argv[]){
     // //stable_insert(st, "a");
     Instruction *new = malloc(sizeof(Instruction*));
     const char *errptr = malloc(sizeof(char*));
-    parse(" loop CHUL $9, $8, 1\n", st, &new, &errptr);
-    printf(" loop CHUL $9, $8, 1\n");
+    parse(" loop MUL $0, $10   \n", st, &new, &errptr);
+    printf(" loop MUL $0, $10   \n");
     printf("%s\n", errptr);
     // parse(" b IS $10\n", st, new, NULL);
     // parse(" loop MUL   a , b, -10* Faz multiplicacao\n", st, new, NULL);
