@@ -95,7 +95,10 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
     int value = 0; //value is the number
     int pot = 1;
     for(int i = strlen(str)-1; i >= 0; i--){
-        if(str[i] < '0' || str[i] > '9'){
+        if(i == 0 && str[i] == '-'){
+            pot*=-1;
+        }
+        else if(str[i] < '0' || str[i] > '9'){
             /*ERROR: INVALID OPERAND*/ /*GERAL CASE*/
             /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
             printf("ERROR: INVALID OPERAND\n");
@@ -421,7 +424,7 @@ int main(int argc, char *argv[]){
     Instruction **new = malloc(sizeof(Instruction**));
     parse(" a IS $9\n", st, new, NULL);
     parse(" b IS $10\n", st, new, NULL);
-    parse(" loop MUL   a , b, $1* Faz multiplicacao\n", st, new, NULL);
+    parse(" loop MUL   a , b, -10* Faz multiplicacao\n", st, new, NULL);
     parse(" 1 MUL   a , loop, $1* Faz multiplicacao\n", st, new, NULL);
     parse(" 2 JMP   loop*\n", st, new, NULL);
     parse(" 4 JMP   1*\n", st, new, NULL);
