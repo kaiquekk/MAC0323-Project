@@ -123,10 +123,11 @@ static char** operandsFinder(const char *str, unsigned int index){
     operandsCounter = 0; //initializing the counter variable
     for(unsigned int i = index; i < strlen(str); i++){
         if(i == strlen(str)-1){
-            if(strcmp("", tmp) == 0){
+            if(!strcmp("", tmp)){
+                set_error_msg("expected operand");
+
                 /*ERROR: OPERAND EXPECTED (Example: a,,b)*/
                 /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
-                printf("ERROR: OPERAND EXPECTED");
             }
             token[operandsCounter] = (char*)malloc(sizeof(char)*(tmpCounter+1)); 
             strcpy(token[operandsCounter++], tmp); //put the tmp in the token array
@@ -197,6 +198,22 @@ static char** operandsFinder(const char *str, unsigned int index){
     return token;
 }
 
+int check_label(char *str){
+    for(int index = 0; index < strlen(str); index++){
+        if(index==0){
+            if(!isalpha(str[0]) && str[0] != '_'){//first letter is not a letter nor an underscore
+                set_error_msg("invalid label name");
+                return 0;
+            }
+        }
+        else if(!isalpha(str[index]) && !isdigit(str[index]) && str[index] != '_'){//letter on index is not a letter nor a number nor an underscore
+            set_error_msg("invalid label name");
+            return 0;
+        }
+    }
+    return 1;
+}
+
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){
     char *str = (char*)malloc(sizeof(char)*strlen(s));
@@ -223,18 +240,34 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         firstStr[firstStrCounter++] = str[i];
     }
     /*Now, the first string was found, and is necessary to know if it is a label or a operator*/
-    if(optable_find(firstStr) == NULL){
-        /*the first token is not a operator, so it will be assumed the first token is a LABEL or the operator IS*/        
+    Operator *opF = optable_find(firstStr);
+    if(opF == NULL){
+        /*the first token is not a operator, so it will be assumed the first token is a LABEL or the operator IS*/ 
+        //check if the label is valid
+        if(!check_label(firstStr)){
+            int errorAuxCounter = endOfFirstStr - strlen(firstStr);
+            char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter);
+            memset(errorAux, ' ', errorAuxCounter-1);
+            errorAux[errorAuxCounter-1] = '^';
+            *errptr = errorAux;
+            return 0;
+        }
+               
         /*so it's necessary to check if the label already exists*/
         Instruction *current = *instr;
         while(current != NULL){
-            if(current->label != NULL && strcmp(current->label, firstStr) == 0){        
-                /*ERROR: LABEL ALREADY EXISTS*/
-                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
-                printf("ERROR: LABEL ALREADY EXISTS\n");
+            if(current->label != NULL && !strcmp(current->label, firstStr)){//label name already on the linked list   
+                set_error_msg("label name already in use");
+                int errorAuxCounter = endOfFirstStr - strlen(firstStr);
+                char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter);
+                memset(errorAux, ' ', errorAuxCounter-1);
+                errorAux[errorAuxCounter-1] = '^';
+                *errptr = errorAux;
+                return 0;                
             }
             current = current->next;        
         }
+
         /*so the second string needs to be a operator*/
         for(unsigned int i = endOfFirstStr; i < strlen(str); i++){
             /*Identifies the second string before a space char*/
@@ -242,22 +275,28 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 endOfSecondStr = i+1;
                 break;
             }
-            if(isspace(str[i]) && strcmp(secondStr, "") == 0){
+            if(isspace(str[i]) && !strcmp(secondStr, "")){
                 continue;
             }
             secondStr[secondStrCounter++] = str[i];            
         }
-        if(optable_find(secondStr) == NULL){
-            /*ERROR: EXPECTED OPERATOR*/
-            /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO */
-            printf("ERROR: EXPECTED OPERATOR\n");
+        opF = optable_find(secondStr);
+        if(opF == NULL){//second string found is not an operator
+            set_error_msg("expected operator");
+            int errorAuxCounter = endOfSecondStr - strlen(secondStr);
+            char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter);
+            memset(errorAux, ' ', errorAuxCounter-1);
+            errorAux[errorAuxCounter-1] = '^';
+            *errptr = errorAux;
+            return 0;  
         }
         else{
             /*CHECKING "IS": THE SPECIAL CASE*/
-            if(strcmp(secondStr, "IS") == 0){
+            //UNCHECKED!!
+            if(!strcmp(secondStr, "IS")){
                 Operand *newOperands[3];
                 char **operands = operandsFinder(str, endOfSecondStr);
-                Operator* opFound = optable_find(secondStr);
+                Operator* opFound = optable_find(secondStr);//IS operator
                 if(operandsCounter != operandsInOperator(opFound)){
                     if(operandsCounter < operandsInOperator(opFound)){
                         /*ERROR: TOO FEW OPERANDS*/
@@ -306,25 +345,25 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             }
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(str, endOfSecondStr);
-            Operator* opFound = optable_find(secondStr);  
+            // Operator* opFound = optable_find(secondStr);  opF
             Operand *newOperands[3];        
             /*number of operands validation*/
-            if(operandsCounter != operandsInOperator(opFound)){
-                if(operandsCounter < operandsInOperator(opFound)){
+            if(operandsCounter != operandsInOperator(opF)){
+                if(operandsCounter < operandsInOperator(opF)){
                     /*ERROR: TOO FEW OPERANDS*/
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/                
                     printf("ERROR: TOO FEW OPERANDS\n");
                 }
-                else if(operandsCounter > operandsInOperator(opFound)){
+                else if(operandsCounter > operandsInOperator(opF)){
                     /*ERROR: TOO MANY OPERANDS*/
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/      
                     printf("ERROR: TOO MANY OPERANDS\n");    
                 }
             }                   
-            for(int i = 0; i < operandsInOperator(opFound); i++){             
+            for(int i = 0; i < operandsInOperator(opF); i++){             
                /*CHECK IF THE OPERAND TYPES ARE OK*/
                 OperandType opType = operandsAnalyser(operands[i], alias_table, instr, 0);
-                if (!(opType & opFound->opd_types[i])) { // bitwise and
+                if (!(opType & opF->opd_types[i])) { // bitwise and
                     /*ERROR: WRONG OPERAND TYPE*/
                     /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/      
                     printf("ERROR: WRONG OPERAND TYPE\n");
@@ -351,7 +390,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 }
                 operandsCounter++;                
             }
-            Instruction *new = instr_create(firstStr, opFound, newOperands);
+            Instruction *new = instr_create(firstStr, opF, newOperands);
             printf("label: %s | operator: %s | operandType: %d | operandType: %d | operandType: %d\n", new->label, new->op->name, new->opds[0]->type,new->opds[1]->type,new->opds[2]->type);
             new->next = *instr;
             *instr = new;
@@ -420,15 +459,18 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
 
 int main(int argc, char *argv[]){
     SymbolTable st = stable_create();   
-    //stable_insert(st, "a");
-    Instruction **new = malloc(sizeof(Instruction**));
-    parse(" a IS $9\n", st, new, NULL);
-    parse(" b IS $10\n", st, new, NULL);
-    parse(" loop MUL   a , b, -10* Faz multiplicacao\n", st, new, NULL);
-    parse(" 1 MUL   a , loop, $1* Faz multiplicacao\n", st, new, NULL);
-    parse(" 2 JMP   loop*\n", st, new, NULL);
-    parse(" 4 JMP   1*\n", st, new, NULL);
-    parse(" 5 JMP   2*\n", st, new, NULL);
-    parse(" 5 JMP   5*\n", st, new, NULL);
+    // //stable_insert(st, "a");
+    Instruction *new = malloc(sizeof(Instruction*));
+    const char *errptr = malloc(sizeof(char*));
+    parse(" loop CHUL $9, $8, 1\n", st, &new, &errptr);
+    printf(" loop CHUL $9, $8, 1\n");
+    printf("%s\n", errptr);
+    // parse(" b IS $10\n", st, new, NULL);
+    // parse(" loop MUL   a , b, -10* Faz multiplicacao\n", st, new, NULL);
+    // parse(" 1 MUL   a , loop, $1* Faz multiplicacao\n", st, new, NULL);
+    // parse(" 2 JMP   loop*\n", st, new, NULL);
+    // parse(" 4 JMP   1*\n", st, new, NULL);
+    // parse(" 5 JMP   2*\n", st, new, NULL);
+    // parse(" 5 JMP   5*\n", st, new, NULL);
     return 0;    
 }
