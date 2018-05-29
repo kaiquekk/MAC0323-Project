@@ -59,8 +59,6 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
                 printf("ERROR: $ INVALID REGISTER\n");
             }
             else{
-                /*RETURN REGISTER;*/
-                /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
                 printf("REGISTER: %s\n", str);
                 number = value;
                 return REGISTER;
@@ -70,8 +68,6 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
     /*VERIFICATION 2: STRING*/
     if(str[0] == '\"'){
         if(str[strlen(str)-1] == '\"'){
-            /*RETURN STRING;*/
-            /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
             printf("STRING: %s\n", str);
             return STRING;
         }
@@ -85,21 +81,13 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
     Instruction *current = *instr;
     while(current != NULL){
         if(current->label != NULL && strcmp(current->label, str) == 0){        
-            /*RETURN LABEL;
-            TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
             printf("LABEL: %s\n", str);
             return LABEL;
-        }
-        printf("label: %s\n", current->label);
-        if(current->next == NULL){
-            printf("Tá NULL\n");
         }
         current = current->next;        
     }
     /*VERIFICATION 4: REGISTER ALIAS*/
     if(stable_find(alias_table, str) != NULL){        
-        /*RETURN REGISTER ALIAS*/
-        /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
         printf("REGISTER ALIAS: %s\n", str);
         return REGISTER;
     }
@@ -117,8 +105,6 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
             pot *= 10;
         }
     }
-    /*RETURN NUMBER*/
-    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
     printf("NUMBER: %s\n", str);
     number = value;
     return NUMBER_TYPE;
@@ -262,7 +248,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                     /*CREATE NEW INSTRUCTION*/
                     Instruction *new = instr_create(firstStr, opFound, newOperands);
                     printf("label: %s | operator: %s | operandType: %d | operandType: %d | operandType: %d\n", new->label, new->op->name, new->opds[0]->type,new->opds[1]->type,new->opds[2]->type);
-                    new->next = instr;
+                    new->next = *instr;
                     *instr = new;
                     printf("NEW INSTRUCTION CREATED\n");
                     break;
@@ -310,7 +296,8 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             if(operandsCounter != operandsInOperator(opFound)){
                 if(operandsCounter < operandsInOperator(opFound)){
                     /*ERROR: TOO FEW OPERANDS*/
-                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/                
+                    /*TO DOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO*/
+                    printf("OperandsCoutner %d", operandsCounter);               
                     printf("ERROR: TOO FEW OPERANDS\n");
                 }
                 else if(operandsCounter > operandsInOperator(opFound)){
@@ -325,7 +312,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                     /*CREATE NEW INSTRUCTION*/
                     Instruction *new = instr_create(NULL, opFound, newOperands);
                     printf("label: %s | operator: %s | operandType: %d | operandType: %d | operandType: %d\n", new->label, new->op->name, new->opds[0]->type,new->opds[1]->type,new->opds[2]->type);
-                    new->next = instr;
+                    new->next = *instr;
                     *instr = new;
                     printf("NEW INSTRUCTION CREATED\n");
                     break;
@@ -369,7 +356,8 @@ int main(int argc, char *argv[]){
     SymbolTable st = stable_create();   
     stable_insert(st, "a");
     Instruction **new = malloc(sizeof(Instruction**));
-    parse(" MUL   a , a, $1* Faz multiplicacao\n", st, new, NULL);
-    //parse(" MUL   a , loop, $1* Faz multiplicacao\n", st, new, NULL);
+    parse(" loop MUL   a , a, $1* Faz multiplicacao\n", st, new, NULL);
+    parse(" MUL   a , loop, $1* Faz multiplicacao\n", st, new, NULL);
+    parse(" JMP   loop*\n", st, new, NULL);
     return 0;    
 }
