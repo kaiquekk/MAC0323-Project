@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -std=c99 -pedantic -O2 -Wextra
 
 $(TARGET): $(OBJECTS) $(HEADERS)
-	$(CC) $(CFLAGS) parse_text.c -o parse_text
+	$(CC) $(CFLAGS) parse_test.c -o parse_test
 
 clean:
 	-rm -f $(TARGET)
