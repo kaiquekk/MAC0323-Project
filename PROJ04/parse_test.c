@@ -94,10 +94,10 @@ int getLength(int x){
 }
 
 //errors to be fixed:
-//STR teste --- unknown register with errptr to S and lots of thrash after the ^
+//lots of thrash on the errptr after the ^
 
 //observations:
-//lots of errptr with trash
+//a  IS  $4  ->>>  b IS a ---- doesn't work
 //INT doesn't work properly. Need to add a special checking too.
 //client also prints the comments on the "line   =", unlike the ONLY avaliable example.
 ////most likely this happens because the full string analysis is being done on the parser, not with a part in the client
@@ -115,6 +115,7 @@ int main(int argc, char *argv[]){
     const char *errptr = malloc(sizeof(char*));
     Instruction *instr = (Instruction*)malloc(sizeof(Instruction));
     int con = 1, i = 0;
+    add_default_reg(stable);
     while(1){      
         con = read_line(file, buffer);    
         if(con == 0){

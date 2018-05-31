@@ -11,12 +11,22 @@
 
 /*This function split the line, creating a bidimensional array with the strings
 that do not have blank spaces*/
-int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
+int operandsCounter, ind, nop, number; /*the number of Operand in the line(the real number, and not (number-1))*/
 
-int ind, nop;
-
-/*TO OPERANDS*/
-int number;
+void add_default_reg(SymbolTable alias_table){
+    InsertionResult ir = stable_insert(alias_table, "rA");
+    ir.data->opd = operand_create_register(255);
+    ir = stable_insert(alias_table, "rR");
+    ir.data->opd = operand_create_register(254);
+    ir = stable_insert(alias_table, "rSP");
+    ir.data->opd = operand_create_register(253);
+    ir = stable_insert(alias_table, "rX");
+    ir.data->opd = operand_create_register(252);
+    ir = stable_insert(alias_table, "rY");
+    ir.data->opd = operand_create_register(251);
+    ir = stable_insert(alias_table, "rZ");
+    ir.data->opd = operand_create_register(250);
+}
 
 /*operands counter*/
 static int operandsInOperator(const Operator *op){ 
@@ -153,23 +163,9 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
     }
     /*VERIFICATION: REGISTER ALIAS*/
     if(stable_find(alias_table, str) != NULL){  
-        // printf("REGISTER ALIAS: %s | ALIAS VALUE: %d\n", str, stable_find(alias_table, str)->opd->value);
         return REGISTER;
     }
-    else{
-        set_error_msg("unknown register");
-        for(unsigned int y = index; y < strlen(s); y++){
-            if(isalpha(s[y]) || s[y] == '_'){
-                ind = y;
-                break;
-            }
-        }
-        char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
-        memset(errorAux, ' ', ind);
-        errorAux[ind] = '^';
-        *errptr = errorAux;
-        return 0;
-    }
+    else return LABEL;
     return 0;      
 }
 
@@ -417,8 +413,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         return 0;  
                     }
                     else{
-                        InsertionResult ir = stable_insert(alias_table, firstStr);                        
-                        // EntryData *reg = stable_find(alias_table, firstStr);
+                        InsertionResult ir = stable_insert(alias_table, firstStr);   
                         if(opType == REGISTER){
                             if(operands[0][0] == '$'){                                
                                 ir.data->opd = operand_create_register(number);
@@ -490,6 +485,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                                 newOperands[i] = operand_create_number(ed->opd->value.num);
                             }
                         }
+                    }
+                    else if(opType == LABEL && ed == NULL && (opF->opd_types[i] & LABEL)){
+                        newOperands[i] = operand_create_label(operands[i]);
                     }
                     else{
                         set_error_msg("wrong operand type");
@@ -597,6 +595,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                             newOperands[i] = operand_create_number(ed->opd->value.num);
                         }
                     }
+                }
+                else if(opType == LABEL && ed == NULL && (opF->opd_types[i] & LABEL)){
+                    newOperands[i] = operand_create_label(operands[i]);
                 }
                 else{
                     set_error_msg("wrong operand type");
