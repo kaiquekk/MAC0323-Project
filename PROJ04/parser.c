@@ -13,7 +13,7 @@
 that do not have blank spaces*/
 int operandsCounter; /*the number of Operand in the line(the real number, and not (number-1))*/
 
-int ind;
+int ind, nop;
 
 /*TO OPERANDS*/
 int number;
@@ -184,8 +184,8 @@ static char** operandsFinder(const char *str, unsigned int index, const char **e
     operandsCounter = 0; //initializing the counter variable
     for(unsigned int i = index; i <= strlen(str); i++){
         if(i == strlen(str)){
-            // printf("aqui  %s\n", tmp);
             if(!strcmp("", tmp)){
+                if(nop != 0) return token;
                 set_error_msg("expected operand");
                 char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
                 memset(errorAux, '\0', ind);
@@ -296,6 +296,7 @@ int check_label(char *str){
 
 int parse(const char *s, SymbolTable alias_table, Instruction **instr,
           const char **errptr){    
+    nop = 0;
     char *firstStr = (char*)emalloc(strlen(s)); 
     int firstStrCounter = 0, endOfFirstStr = 0;
     //firstStr = first string of line
@@ -355,6 +356,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             }
             secondStr[secondStrCounter++] = s[i];            
         }        
+        if(endOfSecondStr == 0) endOfSecondStr = strlen(s);
         opF = optable_find(secondStr);
         if(opF == NULL){//second string found is not an operator
             set_error_msg("expected operator");
@@ -366,6 +368,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             return 0;  
         }
         else{
+            if(!strcmp(secondStr, "NOP")){
+                nop = 1;
+            }
             /*CHECKING "IS"*/
             if(!strcmp(secondStr, "IS")){
                 Operand **newOperands = (Operand**)emalloc(sizeof(Operand*)*3);
@@ -382,7 +387,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 }                
                 OperandType opType = operandsAnalyser(operands[0], alias_table, instr, errptr, 0, s);                
                 if(opType == 0) return 0;
-                if (!(opType & opF->opd_types[0])) { // bitwise and
+                if (!(opType & opF->opd_types[0])) { // bitwise and                    
                     set_error_msg("wrong operand type");
                     for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
                         if(!isspace(s[y])){
@@ -440,7 +445,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             char **operands = operandsFinder(s, endOfSecondStr, errptr);
             if(operands == 0) return 0; //error found in the operandsFinder function
             Operand **newOperands = (Operand**)emalloc(sizeof(Operand*)*3); 
-            /*number of operands validation*/
+            /*number of operands validation*/            
             if(operandsCounter != operandsInOperator(opF)){
                 if(operandsCounter < operandsInOperator(opF)) set_error_msg("expected operand");
                 else set_error_msg("too many operands");
@@ -540,6 +545,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         }
     }
     else{
+        if(!strcmp(firstStr, "NOP")){
+            nop = 1;
+        }
         /*the first token is a OPERATOR, so the second block of strings needs to be the OPERANDS*/
         /*a operator was found, so the next block of strings needs to be the operands*/
         char **operands = operandsFinder(s, endOfFirstStr, errptr);
@@ -560,23 +568,55 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             OperandType opType = operandsAnalyser(operands[i], alias_table, instr, errptr, 0, s);
             if(opType == 0) return 0;
             if (!(opType & opF->opd_types[i])) { // bitwise and
-                set_error_msg("wrong operand type");
-                int comCount = 0;
-                for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
-                    if(!isspace(s[y]) && s[y] != ','){
-                        if(comCount == i){
-                            ind = y;
-                            break;
+                EntryData *ed = stable_find(alias_table, operands[i]);
+                if(opType == LABEL && ed != NULL){
+                    if(!(ed->opd->type & opF->opd_types[i])){
+                        set_error_msg("wrong operand type");
+                        int comCount = 0;
+                        for(unsigned int y = endOfFirstStr; y < strlen(s); y++){
+                            if(!isspace(s[y]) && s[y] != ','){
+                                if(comCount == i){
+                                    ind = y;
+                                    break;
+                                }
+                                else continue;
+                            }
+                            else if(s[y] == ',') comCount++;
                         }
-                        else continue;
+                        char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                        memset(errorAux, ' ', ind);
+                        errorAux[ind] = '^';
+                        *errptr = errorAux;
+                        return 0;
                     }
-                    else if(s[y] == ',') comCount++;
+                    else{
+                        if(ed->opd->type == REGISTER){
+                            newOperands[i] = operand_create_register(ed->opd->value.reg);
+                        }
+                        else{
+                            newOperands[i] = operand_create_number(ed->opd->value.num);
+                        }
+                    }
                 }
-                char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
-                memset(errorAux, ' ', ind);
-                errorAux[ind] = '^';
-                *errptr = errorAux;  
-                return 0;  
+                else{
+                    set_error_msg("wrong operand type");
+                    int comCount = 0;
+                    for(unsigned int y = endOfFirstStr; y < strlen(s); y++){
+                        if(!isspace(s[y]) && s[y] != ','){
+                            if(comCount == i){
+                                ind = y;
+                                break;
+                            }
+                            else continue;
+                        }
+                        else if(s[y] == ',') comCount++;
+                    }
+                    char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                    memset(errorAux, ' ', ind);
+                    errorAux[ind] = '^';
+                    *errptr = errorAux;  
+                    return 0; 
+                } 
             }
             else{
                 if(opType == REGISTER){

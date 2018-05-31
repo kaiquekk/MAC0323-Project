@@ -94,13 +94,10 @@ int getLength(int x){
 }
 
 //errors to be fixed:
-//calls to labels on the stable not working correctly --- wrong operand type
 //STR teste --- unknown register with errptr to S and lots of thrash after the ^
-////JZ  $1, loop --- unknown register with errptr to J 
-//NOP not working
-//////PUSH $4 --- invalid register with errptr to 4 and lots of trash after the ^
 
 //observations:
+//lots of errptr with trash
 //INT doesn't work properly. Need to add a special checking too.
 //client also prints the comments on the "line   =", unlike the ONLY avaliable example.
 ////most likely this happens because the full string analysis is being done on the parser, not with a part in the client
