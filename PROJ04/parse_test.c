@@ -94,15 +94,11 @@ int getLength(int x){
 }
 
 //errors to be fixed:
-//a IS $3 --- invalid register with errptr to 3 and lots of thrash after the ^
-//a IS 3 --- expected operand no errptr
+//calls to labels on the stable not working correctly --- wrong operand type
 //STR teste --- unknown register with errptr to S and lots of thrash after the ^
-//calls to labels not working. Most likely errors on the stable manipulation.
 ////JZ  $1, loop --- unknown register with errptr to J 
 //NOP not working
-////maybe problems with operators without 3 operands
 //////PUSH $4 --- invalid register with errptr to 4 and lots of trash after the ^
-//probably code errors on lines without a label
 
 //observations:
 //INT doesn't work properly. Need to add a special checking too.

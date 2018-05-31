@@ -371,6 +371,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 Operand **newOperands = (Operand**)emalloc(sizeof(Operand*)*3);
                 char **operands = operandsFinder(s, endOfSecondStr, errptr);
                 if(operands == 0) return 0;
+                printf("%s\n", operands[0]);////////////
                 if(operandsCounter != operandsInOperator(opF)){
                     if(operandsCounter < operandsInOperator(opF)) set_error_msg("expected operand");
                     else set_error_msg("too many operands");
@@ -379,8 +380,8 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                     errorAux[ind] = '^';
                     *errptr = errorAux;  
                     return 0; 
-                }
-                OperandType opType = operandsAnalyser(operands[0], alias_table, instr, errptr, 0, s);
+                }                
+                OperandType opType = operandsAnalyser(operands[0], alias_table, instr, errptr, 0, s);                
                 if(opType == 0) return 0;
                 if (!(opType & opF->opd_types[0])) { // bitwise and
                     set_error_msg("wrong operand type");
@@ -396,7 +397,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                     *errptr = errorAux;  
                     return 0; 
                 }
-                else{                    
+                else{                   
                     if(stable_find(alias_table, firstStr) != NULL){
                         set_error_msg("alias already exists");
                         for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
@@ -412,17 +413,17 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         return 0;  
                     }
                     else{
-                        stable_insert(alias_table, firstStr);
-                        EntryData *reg = stable_find(alias_table, firstStr);
+                        InsertionResult ir = stable_insert(alias_table, firstStr);                        
+                        // EntryData *reg = stable_find(alias_table, firstStr);
                         if(opType == REGISTER){
                             if(operands[0][0] == '$'){
-                                reg->opd = operand_create_register(number);
-                                newOperands[0] = reg->opd;
+                                ir.data->opd = operand_create_register(number);
+                                newOperands[0] = ir.data->opd;
                             }
                         }
                         else{
-                            reg->opd = operand_create_number(number);
-                            newOperands[0] = reg->opd;
+                            ir.data->opd = operand_create_number(number);
+                            newOperands[0] = ir.data->opd;
                         }                          
                         if((*instr)->op == NULL){
                             *instr = instr_create(firstStr, opF, newOperands);
@@ -434,7 +435,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         }                    
                     }                    
                 }
-                return 0;
+                return 1;
             }
             /*a operator was found, so the next block of strings needs to be the operands*/
             char **operands = operandsFinder(s, endOfSecondStr, errptr);
