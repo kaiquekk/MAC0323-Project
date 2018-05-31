@@ -1,8 +1,7 @@
-#include <math.h>
 #include "parser.c"
 #include "buffer.c"
 
-void printInstr(Instruction **instr){
+void printInstr(Instruction **instr){//print the instruction
     if((*instr)->label != NULL) printf("label    = %s\n", (*instr)->label);
     else printf("label    = n/a\n");
     printf("operator = %s\n", (*instr)->op->name);
@@ -11,8 +10,9 @@ void printInstr(Instruction **instr){
         i++;
         if(i == 3) break;
     }
+    // printf("%d  %d\n", (*instr)->opds[0]->type, (*instr)->opds[1]->type);
     switch(i){
-        case 0:            
+        case 0:          
             printf("operands = n/a\n\n");
             break;
         case 1:
@@ -98,6 +98,25 @@ int getLength(int x){
     return count;
 }
 
+//errors to be fixed:
+//NUMBER operands losing one digit eg. 10 -> 1, 100 -> 10, etc  
+//a IS $3 --- invalid register with errptr to 3 and lots of thrash after the ^
+//a IS 3 --- expected operand no errptr
+//STR teste --- unknown register with errptr to S and lots of thrash after the ^
+//STR "teste" --- invalid string with an strange symbol on the first quote
+//STR 'teste' --- unknown register with errptr to S and lots of thrash after the ^
+//calls to labels not working. Most likely errors on the stable manipulation.
+////JZ  $1, loop --- unknown register with errptr to J 
+//NOP --- SegFault  ---- opds[]->type = random number when should be 0
+////maybe problems with operators without 3 operands
+//////loop PUSH $4 --- invalid register with errptr to 4
+//////PUSH $4 --- invalid register with errptr to 4 and lots of trash after the ^
+//probably code errors on lines without a label
+
+//observations:
+//INT doesn't work properly. Need to add a special checking too.
+//client also prints the comments on the "line   =", unlike the ONLY avaliable example.
+////most likely this happens because the full string analysis is being done on the parser, not with a part in the client
 int main(int argc, char *argv[]){
     set_prog_name(argv[0]);
     if(argc == 1){
@@ -114,9 +133,7 @@ int main(int argc, char *argv[]){
 
     int con = 1, i = 0;
     while(1){      
-        con = read_line(file, buffer);
-        // printf("%s\n", (char*)buffer->data);     
-        
+        con = read_line(file, buffer);        
         if(con == 0){
             break;
         }
@@ -134,7 +151,7 @@ int main(int argc, char *argv[]){
             printInstr(&new);
         }
         else{            
-            printf("line %d: %s\n", i, (char*)buffer->data);
+            printf("line %d: %s\n", i+1, (char*)buffer->data);
             int sz = 7 + getLength(i);
             printf("%*s%s\n", sz, " ", errptr);
             buffer_destroy(buffer);
