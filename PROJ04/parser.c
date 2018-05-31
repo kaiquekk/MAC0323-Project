@@ -371,7 +371,6 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 Operand **newOperands = (Operand**)emalloc(sizeof(Operand*)*3);
                 char **operands = operandsFinder(s, endOfSecondStr, errptr);
                 if(operands == 0) return 0;
-                printf("%s\n", operands[0]);////////////
                 if(operandsCounter != operandsInOperator(opF)){
                     if(operandsCounter < operandsInOperator(opF)) set_error_msg("expected operand");
                     else set_error_msg("too many operands");
@@ -416,7 +415,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         InsertionResult ir = stable_insert(alias_table, firstStr);                        
                         // EntryData *reg = stable_find(alias_table, firstStr);
                         if(opType == REGISTER){
-                            if(operands[0][0] == '$'){
+                            if(operands[0][0] == '$'){                                
                                 ir.data->opd = operand_create_register(number);
                                 newOperands[0] = ir.data->opd;
                             }
@@ -432,7 +431,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                             Instruction *new = *instr;
                             while(new->next != NULL) new = new->next;                            
                             new->next = instr_create(firstStr, opF, newOperands);
-                        }                    
+                        }                  
                     }                    
                 }
                 return 1;
@@ -457,23 +456,55 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 //error found in the operandsAnalyser function
                 if(opType == 0) return 0;
                 if (!(opType & opF->opd_types[i])) { // bitwise and
-                    set_error_msg("wrong operand type");
-                    int comCount = 0;
-                    for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
-                        if(!isspace(s[y]) && s[y] != ','){
-                            if(comCount == i){
-                                ind = y;
-                                break;
+                    EntryData *ed = stable_find(alias_table, operands[i]);
+                    if(opType == LABEL && ed != NULL){
+                        if(!(ed->opd->type & opF->opd_types[i])){
+                            set_error_msg("wrong operand type");
+                            int comCount = 0;
+                            for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
+                                if(!isspace(s[y]) && s[y] != ','){
+                                    if(comCount == i){
+                                        ind = y;
+                                        break;
+                                    }
+                                    else continue;
+                                }
+                                else if(s[y] == ',') comCount++;
                             }
-                            else continue;
+                            char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                            memset(errorAux, ' ', ind);
+                            errorAux[ind] = '^';
+                            *errptr = errorAux;
+                            return 0;
                         }
-                        else if(s[y] == ',') comCount++;
+                        else{
+                            if(ed->opd->type == REGISTER){
+                                newOperands[i] = operand_create_register(ed->opd->value.reg);
+                            }
+                            else{
+                                newOperands[i] = operand_create_number(ed->opd->value.num);
+                            }
+                        }
                     }
-                    char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
-                    memset(errorAux, ' ', ind);
-                    errorAux[ind] = '^';
-                    *errptr = errorAux;  
-                    return 0;  
+                    else{
+                        set_error_msg("wrong operand type");
+                        int comCount = 0;
+                        for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
+                            if(!isspace(s[y]) && s[y] != ','){
+                                if(comCount == i){
+                                    ind = y;
+                                    break;
+                                }
+                                else continue;
+                            }
+                            else if(s[y] == ',') comCount++;
+                        }
+                        char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                        memset(errorAux, ' ', ind);
+                        errorAux[ind] = '^';
+                        *errptr = errorAux;  
+                        return 0; 
+                    } 
                 }
                 else{
                     if(opType == REGISTER){
