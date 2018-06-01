@@ -7,11 +7,8 @@
 #include "optable.c"
 #include "stable.c"
 #include "asmtypes.c"
-#include <math.h>
 
-/*This function split the line, creating a bidimensional array with the strings
-that do not have blank spaces*/
-int operandsCounter, ind, nop, number; /*the number of Operand in the line(the real number, and not (number-1))*/
+int operandsCounter, ind, nop, number;
 
 void add_default_reg(SymbolTable alias_table){
     InsertionResult ir = stable_insert(alias_table, "rA");
@@ -56,9 +53,10 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
                     }
                 }
             }
-            char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+            char *errorAux = (char*)emalloc(sizeof(char) * ind);
             memset(errorAux, ' ', ind);
             errorAux[ind] = '^';
+            errorAux[ind+1] = 0;
             *errptr = errorAux;
             return 0;
         }
@@ -79,9 +77,10 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
                             }                          
                         }
                     }
-                    char *errorAux = (char*)emalloc(sizeof(char) * ind+2);
+                    char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
                     memset(errorAux, ' ', ind+1);
                     errorAux[ind+1] = '^';
+                    errorAux[ind+2] = 0;
                     *errptr = errorAux;
                     return 0;
                 }
@@ -114,9 +113,10 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
                     }
                     if(counterC >= 3) break;
                 }
-                char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                char *errorAux = (char*)emalloc(sizeof(char) * ind);
                 memset(errorAux, ' ', ind);
                 errorAux[ind] = '^';
+                errorAux[ind+1] = 0;
                 *errptr = errorAux;
                 return 0;
             }
@@ -142,9 +142,10 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
                 }
             }
         }
-        char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+        char *errorAux = (char*)emalloc(sizeof(char) * ind);
         memset(errorAux, ' ', ind);
         errorAux[ind] = '^';
+        errorAux[ind+1] = 0;
         *errptr = errorAux;
         return 0;
     }
@@ -156,7 +157,7 @@ static OperandType operandsAnalyser(const char *str, SymbolTable alias_table,
         current = current->next;        
     }
 
-    //VERIFICATION: NUMBER
+    /*VERIFICATION: NUMBER*/
     if(isdigit(str[0])){
         number = atoi(str);
         return NUMBER_TYPE; 
@@ -183,9 +184,10 @@ static char** operandsFinder(const char *str, unsigned int index, const char **e
             if(!strcmp("", tmp)){
                 if(nop != 0) return token;
                 set_error_msg("expected operand");
-                char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
-                memset(errorAux, '\0', ind);
+                char *errorAux = (char*)emalloc(sizeof(char) * ind);
+                memset(errorAux, ' ', ind);
                 errorAux[ind] = '^';
+                errorAux[ind+1] = 0;
                 *errptr = errorAux;
                 return 0;
             }
@@ -213,9 +215,10 @@ static char** operandsFinder(const char *str, unsigned int index, const char **e
         else if(str[i] == '*'){
             if(!strcmp("", tmp)){
                 set_error_msg("expected operand");
-                char *errorAux = (char*)emalloc(sizeof(char) * i);
-                memset(errorAux, '\0', i-1);
+                char *errorAux = (char*)emalloc(sizeof(char) * i-1);
+                memset(errorAux, ' ', i-1);
                 errorAux[i-1] = '^';
+                errorAux[i] = 0;
                 *errptr = errorAux;
                 return 0;
             }
@@ -230,9 +233,10 @@ static char** operandsFinder(const char *str, unsigned int index, const char **e
         else if(str[i] == ','){
             if(!strcmp("", tmp)){
                 set_error_msg("expected operand");
-                char *errorAux = (char*)emalloc(sizeof(char) * i);
-                memset(errorAux, '\0', i-1);
+                char *errorAux = (char*)emalloc(sizeof(char) * i-1);
+                memset(errorAux, ' ', i-1);
                 errorAux[i-1] = '^';
+                errorAux[i] = 0;
                 *errptr = errorAux;
                 return 0;
             }
@@ -247,9 +251,10 @@ static char** operandsFinder(const char *str, unsigned int index, const char **e
         else{
             if(space == 1){
                 set_error_msg("invalid operands positioning");
-                char *errorAux = (char*)emalloc(sizeof(char) * i);
-                memset(errorAux, '\0', i-1);
+                char *errorAux = (char*)emalloc(sizeof(char) * i-1);
+                memset(errorAux, ' ', i-1);
                 errorAux[i-1] = '^';
+                errorAux[i] = 0;
                 *errptr = errorAux;
                 return 0;
             }
@@ -318,9 +323,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         //check if the label is valid
         if(!check_label(firstStr)){            
             int errorAuxCounter = endOfFirstStr - strlen(firstStr);
-            char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter);
+            char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter-1);
             memset(errorAux, ' ', errorAuxCounter-1);
             errorAux[errorAuxCounter-1] = '^';
+            errorAux[errorAuxCounter] = 0;
             *errptr = errorAux;
             return 0;
         }      
@@ -330,9 +336,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             if(current->label != NULL && !strcmp(current->label, firstStr)){//label name already on the linked list   
                 set_error_msg("label name already in use");
                 int errorAuxCounter = endOfFirstStr - strlen(firstStr);
-                char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter);
+                char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter-1);
                 memset(errorAux, ' ', errorAuxCounter-1);
                 errorAux[errorAuxCounter-1] = '^';
+                errorAux[errorAuxCounter] = 0;
                 *errptr = errorAux;
                 return 0;                
             }
@@ -357,9 +364,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         if(opF == NULL){//second string found is not an operator
             set_error_msg("expected operator");
             int errorAuxCounter = endOfSecondStr - strlen(secondStr);
-            char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter);
+            char *errorAux = (char*)emalloc(sizeof(char) * errorAuxCounter-1);
             memset(errorAux, ' ', errorAuxCounter-1);
             errorAux[errorAuxCounter-1] = '^';
+            errorAux[errorAuxCounter] = 0;
             *errptr = errorAux;
             return 0;  
         }
@@ -367,7 +375,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             if(!strcmp(secondStr, "NOP")){
                 nop = 1;
             }
-            /*CHECKING "IS"*/
+            /*SPECIAL CASE "IS"*/
             if(!strcmp(secondStr, "IS")){
                 Operand **newOperands = (Operand**)emalloc(sizeof(Operand*)*3);
                 char **operands = operandsFinder(s, endOfSecondStr, errptr);
@@ -375,9 +383,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                 if(operandsCounter != operandsInOperator(opF)){
                     if(operandsCounter < operandsInOperator(opF)) set_error_msg("expected operand");
                     else set_error_msg("too many operands");
-                    char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                    char *errorAux = (char*)emalloc(sizeof(char) * ind);
                     memset(errorAux, ' ', ind);
                     errorAux[ind] = '^';
+                    errorAux[ind+1] = 0;
                     *errptr = errorAux;  
                     return 0; 
                 }                
@@ -391,9 +400,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                             break;                             
                         }
                     }
-                    char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                    char *errorAux = (char*)emalloc(sizeof(char) * ind);
                     memset(errorAux, ' ', ind);
                     errorAux[ind] = '^';
+                    errorAux[ind+1] = 0;
                     *errptr = errorAux;  
                     return 0; 
                 }
@@ -406,9 +416,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                                 break;
                             }
                         }
-                        char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                        char *errorAux = (char*)emalloc(sizeof(char) * ind);
                         memset(errorAux, ' ', ind);
                         errorAux[ind] = '^';
+                        errorAux[ind+1] = 0;
                         *errptr = errorAux;  
                         return 0;  
                     }
@@ -444,17 +455,17 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
             if(operandsCounter != operandsInOperator(opF)){
                 if(operandsCounter < operandsInOperator(opF)) set_error_msg("expected operand");
                 else set_error_msg("too many operands");
-                char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                char *errorAux = (char*)emalloc(sizeof(char) * ind);
                 memset(errorAux, ' ', ind);
                 errorAux[ind] = '^';
+                errorAux[ind+1] = 0;
                 *errptr = errorAux;  
                 return 0; 
             }                
             for(int i = 0; i < operandsInOperator(opF); i++){             
-                /*CHECK IF THE OPERAND TYPES ARE OK*/
-                OperandType opType = operandsAnalyser(operands[i], alias_table, instr, errptr, endOfSecondStr, s);
-                //error found in the operandsAnalyser function
-                if(opType == 0) return 0;
+                /*CHECK THE OPERAND TYPES*/
+                OperandType opType = operandsAnalyser(operands[i], alias_table, instr, errptr, endOfSecondStr, s);                
+                if(opType == 0) return 0;//error found in the operandsAnalyser function
                 if (!(opType & opF->opd_types[i])) { // bitwise and
                     EntryData *ed = stable_find(alias_table, operands[i]);
                     if(opType == LABEL && ed != NULL){
@@ -471,9 +482,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                                 }
                                 else if(s[y] == ',') comCount++;
                             }
-                            char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                            char *errorAux = (char*)emalloc(sizeof(char) * ind);
                             memset(errorAux, ' ', ind);
                             errorAux[ind] = '^';
+                            errorAux[ind+1] = 0;
                             *errptr = errorAux;
                             return 0;
                         }
@@ -487,7 +499,26 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         }
                     }
                     else if(opType == LABEL && ed == NULL && (opF->opd_types[i] & LABEL)){
-                        newOperands[i] = operand_create_label(operands[i]);
+                        if(check_label(operands[i]) == 0){
+                            int comCount = 0;
+                            for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
+                                if(!isspace(s[y]) && s[y] != ','){
+                                    if(comCount == i){
+                                        ind = y;
+                                        break;
+                                    }
+                                    else continue;
+                                }
+                                else if(s[y] == ',') comCount++;
+                            }
+                            char *errorAux = (char*)emalloc(sizeof(char) * ind);
+                            memset(errorAux, ' ', ind);
+                            errorAux[ind] = '^';
+                            errorAux[ind+1] = 0;
+                            *errptr = errorAux;
+                            return 0;
+                        }
+                        else newOperands[i] = operand_create_label(operands[i]);
                     }
                     else{
                         set_error_msg("wrong operand type");
@@ -502,9 +533,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                             }
                             else if(s[y] == ',') comCount++;
                         }
-                        char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                        char *errorAux = (char*)emalloc(sizeof(char) * ind);
                         memset(errorAux, ' ', ind);
                         errorAux[ind] = '^';
+                        errorAux[ind+1] = 0;
                         *errptr = errorAux;  
                         return 0; 
                     } 
@@ -520,7 +552,26 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         }
                     }
                     else if(opType == LABEL){
-                        newOperands[i] = operand_create_label(operands[i]);
+                        if(check_label(operands[i]) == 0){
+                            int comCount = 0;
+                            for(unsigned int y = endOfSecondStr; y < strlen(s); y++){
+                                if(!isspace(s[y]) && s[y] != ','){
+                                    if(comCount == i){
+                                        ind = y;
+                                        break;
+                                    }
+                                    else continue;
+                                }
+                                else if(s[y] == ',') comCount++;
+                            }
+                            char *errorAux = (char*)emalloc(sizeof(char) * ind);
+                            memset(errorAux, ' ', ind);
+                            errorAux[ind] = '^';
+                            errorAux[ind+1] = 0;
+                            *errptr = errorAux;
+                            return 0;
+                        }
+                        else newOperands[i] = operand_create_label(operands[i]);
                     }
                     else if(opType == STRING){
                         newOperands[i] = operand_create_string(operands[i]);
@@ -555,14 +606,15 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         if(operandsCounter != operandsInOperator(opF)){
             if(operandsCounter < operandsInOperator(opF)) set_error_msg("expected operand");
             else set_error_msg("too many operands");
-            char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+            char *errorAux = (char*)emalloc(sizeof(char) * ind);
             memset(errorAux, ' ', ind);
             errorAux[ind] = '^';
+            errorAux[ind+1] = 0;
             *errptr = errorAux;  
             return 0; 
         }                  
         for(int i = 0; i < operandsInOperator(opF); i++){             
-            /*CHECK IF THE OPERAND TYPES ARE OK*/
+            /*CHECK THE OPERAND TYPES*/
             OperandType opType = operandsAnalyser(operands[i], alias_table, instr, errptr, 0, s);
             if(opType == 0) return 0;
             if (!(opType & opF->opd_types[i])) { // bitwise and
@@ -581,9 +633,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                             }
                             else if(s[y] == ',') comCount++;
                         }
-                        char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                        char *errorAux = (char*)emalloc(sizeof(char) * ind);
                         memset(errorAux, ' ', ind);
                         errorAux[ind] = '^';
+                        errorAux[ind+1] = 0;
                         *errptr = errorAux;
                         return 0;
                     }
@@ -596,8 +649,27 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         }
                     }
                 }
-                else if(opType == LABEL && ed == NULL && (opF->opd_types[i] & LABEL)){
-                    newOperands[i] = operand_create_label(operands[i]);
+                else if(opType == LABEL && ed == NULL && (opF->opd_types[i] & LABEL)){                    
+                    if(check_label(operands[i]) == 0){
+                        int comCount = 0;
+                        for(unsigned int y = endOfFirstStr; y < strlen(s); y++){
+                            if(!isspace(s[y]) && s[y] != ','){
+                                if(comCount == i){
+                                    ind = y;
+                                    break;
+                                }
+                                else continue;
+                            }
+                            else if(s[y] == ',') comCount++;
+                        }
+                        char *errorAux = (char*)emalloc(sizeof(char) * ind);
+                        memset(errorAux, ' ', ind);
+                        errorAux[ind] = '^';
+                        errorAux[ind+1] = 0;
+                        *errptr = errorAux;
+                        return 0;
+                    }
+                    else newOperands[i] = operand_create_label(operands[i]);
                 }
                 else{
                     set_error_msg("wrong operand type");
@@ -612,9 +684,10 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                         }
                         else if(s[y] == ',') comCount++;
                     }
-                    char *errorAux = (char*)emalloc(sizeof(char) * ind+1);
+                    char *errorAux = (char*)emalloc(sizeof(char) * ind);
                     memset(errorAux, ' ', ind);
                     errorAux[ind] = '^';
+                    errorAux[ind+1] = 0;
                     *errptr = errorAux;  
                     return 0; 
                 } 
@@ -630,7 +703,26 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
                     }
                 }
                 else if(opType == LABEL){
-                    newOperands[i] = operand_create_label(operands[i]);
+                    if(check_label(operands[i]) == 0){
+                        int comCount = 0;
+                        for(unsigned int y = endOfFirstStr; y < strlen(s); y++){
+                            if(!isspace(s[y]) && s[y] != ','){
+                                if(comCount == i){
+                                    ind = y;
+                                    break;
+                                }
+                                else continue;
+                            }
+                            else if(s[y] == ',') comCount++;
+                        }
+                        char *errorAux = (char*)emalloc(sizeof(char) * ind);
+                        memset(errorAux, ' ', ind);
+                        errorAux[ind] = '^';
+                        errorAux[ind+1] = 0;
+                        *errptr = errorAux;
+                        return 0;
+                    }
+                    else newOperands[i] = operand_create_label(operands[i]);
                 }
                 else if(opType == STRING){
                     newOperands[i] = operand_create_string(operands[i]);
@@ -651,23 +743,3 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
     }
     return 1;
 }
-
-// int main(){
-//     SymbolTable st = stable_create();  
-//     Instruction *new = (Instruction*)malloc(sizeof(Instruction));
-//     const char *errptr = malloc(sizeof(char*));
-//     parse("startf  MUL  $2, $3, 1 \n", st, &new, &errptr);
-//     printf("startf  MUL  $2, $3, 1 \n");
-//     printf("%s\n", errptr);
-//     parse("    DIV $4, $2   \n", st, &new, &errptr);
-//     printf("    DIV $4, $2   \n");
-//     printf("%s\n", errptr);
-//     // parse("   abc JNZ $4, loop   \n", st, &new, &errptr);
-//     // printf("   abc JNZ $4, loop   \n");
-//     // printf("%s\n", errptr);
-//     parse("   c IS $85   \n", st, &new, &errptr);
-//     printf("   c IS $85   \n");
-//     printf("%s\n", errptr);
-//     print_error_msg(NULL);
-//     return 0;    
-// }

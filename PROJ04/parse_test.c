@@ -93,14 +93,12 @@ int getLength(int x){
     return count;
 }
 
-//errors to be fixed:
-//lots of thrash on the errptr after the ^
-
-//observations:
-//a  IS  $4  ->>>  b IS a ---- doesn't work
+//issues:
+//a  IS  $4  ->>>  b IS a ---- doesn't work. Don't know if that is right.
+//calling JZ $4, (label name starting with number) does not trigger error.
 //INT doesn't work properly. Need to add a special checking too.
 //client also prints the comments on the "line   =", unlike the ONLY avaliable example.
-////most likely this happens because the full string analysis is being done on the parser, not with a part in the client
+////most likely this happens because the full string analysis is being done on the parser, not removing the comments before on the client.
 int main(int argc, char *argv[]){
     set_prog_name(argv[0]);
     if(argc == 1){
