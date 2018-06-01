@@ -94,6 +94,7 @@ int getLength(int x){
 }
 
 //issues:
+//blank lines triggers invalid label name on the parser.
 //a  IS  $4  ->>>  b IS a ---- doesn't work. Don't know if that is right.
 //calling JZ $4, (label name starting with number) does not trigger error.
 //INT doesn't work properly. Need to add a special checking too.
