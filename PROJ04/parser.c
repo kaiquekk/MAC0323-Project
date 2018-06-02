@@ -305,8 +305,9 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
     //endOfFirstString = index of next char that does not belong of firstString  
     int secondStrCounter = 0, endOfSecondStr = 0;
     memset(firstStr, '\0', strlen(s));
-    for(unsigned int i = 0; i < strlen(s); i++){
+    for(unsigned int i = 0; (i < strlen(s)) || (s[i] != '*'); i++){
         /*Identifies the first string before a space char*/
+        if(s[i] == '*') break;
         if(isspace(s[i]) && strcmp(firstStr, "") != 0){
             endOfFirstStr = i+1;
             break;
@@ -316,6 +317,7 @@ int parse(const char *s, SymbolTable alias_table, Instruction **instr,
         }
         firstStr[firstStrCounter++] = s[i];
     }
+    if(strcmp(firstStr, "") == 0) return 2;
     /*Now, the first string was found, and is necessary to know if it is a label or a operator*/
     const Operator *opF = optable_find(firstStr);
     if(opF == NULL){
