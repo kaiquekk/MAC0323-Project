@@ -121,8 +121,10 @@ int main(int argc, char *argv[]){
             break;
         }          
         int j = parse((char*)buffer->data, stable, &instr, &errptr); 
-        
-        if(j != 0){
+        if(j == 2){
+            continue;
+        }
+        else if(j != 0){
             Instruction *new = instr;
             while(new->next != NULL) new = new->next;
             new->lineno = i;
